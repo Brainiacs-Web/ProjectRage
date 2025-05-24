@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <title>PWians Test Page</title>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect"
+        href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+  <style>
+:root {
+  --primary-color: #1E40AF;        /* Primary blue */
+  --secondary-color: #2563EB;      /* Lighter blue for highlights */
+  --accent-color: #9333EA;         /* Purple accent for contrast */
+  --light-bg: #F1F5F9;             /* Light slate background */
+  --white: #ffffff;
+  --text-color: #1E293B;           /* Slate‑900 */
+  --card-shadow: rgba(0, 0, 0, 0.08);
+  --hover-bg: rgba(30, 64, 175, 0.05);
+}
+
+body.dark-mode {
+  --primary-color: #60A5FA;        /* Light blue */
+  --secondary-color: #3B82F6;      /* Slightly deeper */
+  --accent-color: #C084FC;         /* Light purple */
+  --light-bg: #0F172A;             /* Slate‑900 */
+  --white: #1E293B;                /* Slate‑800 */
+  --text-color: #E2E8F0;           /* Light text */
+  --card-shadow: rgba(0, 0, 0, 0.4);
+  --hover-bg: rgba(96, 165, 250, 0.1);
+}
+
+/* Base Reset & Fonts */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+body {
+  background: var(--light-bg);
+  color: var(--text-color);
+  overflow-x: hidden;
+  transition: background .3s, color .3s;
+}
+
+/* Top Container */
+.top-container {
+  width: 100%;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 10px var(--card-shadow);
+  padding: 20px 30px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+}
+.left-info span {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--secondary-color);
+}
+
+/* Timer & Submit */
+.timer {
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+}
+.timer img {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+.submit-btn {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--white);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.submit-btn:hover {
+  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+}
+
+/* Subject & Chapter Buttons */
+#subject-buttons, #chapter-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px auto;
+  max-width: 600px;
+}
+#subject-buttons button,
+#chapter-buttons button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: 2px solid var(--primary-color);
+  background: var(--white);
+  color: var(--primary-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+#subject-buttons button.activeSubject,
+#chapter-buttons button.activeChapter {
+  background: var(--primary-color);
+  color: var(--white);
+}
+#subject-buttons button:hover,
+#chapter-buttons button:hover {
+  background: var(--hover-bg);
+}
+
+/* Main Exam Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  min-height: 500px;
+  background: var(--white);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px var(--card-shadow);
+}
+
+/* Question Card */
+.question-card {
+  padding: 20px 20px 20px 60px;
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 0 2px 8px var(--card-shadow);
+  margin-bottom: 20px;
+  position: relative;
+}
+.question-number {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.question-text {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}
+
+/* Images */
+.question-image,
+.option-image {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Options */
+.option-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.image-option {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 6px;
+  background: var(--white);
+  border: 2px solid transparent;
+  box-shadow: 0 2px 5px var(--card-shadow);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.image-option:hover,
+.image-option.selected {
+  border-color: var(--primary-color);
+  background: var(--hover-bg);
+}
+.image-option label {
+  width: 100%;
+  cursor: pointer;
+}
+.option-content {
+  font-size: 1rem;
+}
+
+/* Input Answer */
+.input-answer {
+  margin: 10px 0;
+}
+.input-answer label {
+  font-size: 1rem;
+  margin-right: 5px;
+}
+.input-answer input {
+  padding: 8px;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 200px;
+}
+
+/* Review Checkbox */
+.review-container {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.review-container label {
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+/* Navigation Buttons */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+.button-container button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--white);
+  transition: background 0.3s ease;
+}
+.button-container button:hover {
+  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+}
+
+/* Progress Modal */
+.progress-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 260px;
+  height: 100vh;
+  background: var(--white);
+  box-shadow: -4px 0 12px var(--card-shadow);
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+.progress-modal header h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+.progress-modal .close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-color);
+}
+#question-progress {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 15px;
+}
+#question-progress span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--text-color);
+  border-radius: 50%;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+  color: var(--text-color);
+}
+#question-progress span:hover {
+  transform: scale(1.1);
+}
+
+/* Username Modal */
+.modal-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 1100;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+}
+@keyframes fadeIn { to { opacity: 1; } }
+
+.modal {
+  background: var(--white);
+  width: 90%;
+  max-width: 500px;
+  padding: 30px 40px;
+  border-radius: 10px;
+  position: relative;
+  text-align: center;
+}
+.modal h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+.modal input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+.continue-btn {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--white);
+  padding: 12px 30px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.continue-btn:hover {
+  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+  transform: scale(1.05);
+}
+
+/* Hamburger in Question Card */
+.hamburger-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 1.6rem;
+  background: transparent;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  outline: none;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+
+  </style>
+</head>
+<body>
+  <!-- Top Container -->
+  <div class="top-container">
+    <div class="left-info">
+      <div><strong>Batch</strong>: <span id="logged-batch">--</span></div>
+      <div><strong>Candidate Name</strong>: <span id="logged-username">--</span></div>
+      <div><strong>Test Name</strong>: <span id="test-name">--</span></div>
+      <div><strong>Subject</strong>: <span id="current-subject">--</span></div>
+      <div>
+        <strong>Question</strong>:
+        <span id="current-question-index">0</span>/
+        <span id="total-questions">0</span>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="timer" id="timer">
+        <img src="https://i.postimg.cc/Fs22Dm1C/timer-1.png" alt="Timer Icon">
+        <span id="time-left">00:00:00</span>
+      </div>
+      <button class="submit-btn" onclick="submitTest()">Submit Test</button>
+    </div>
+  </div>
+
+  <!-- Subject & Chapter Buttons -->
+  <div id="subject-buttons"></div>
+  <div id="chapter-buttons"></div>
+
+  <!-- Username Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h2>Enter Username to Begin</h2>
+      <input type="text" id="username" placeholder="Enter your username">
+      <button class="continue-btn" onclick="validateCredentials()">Continue</button>
+    </div>
+  </div>
+
+  <!-- Main Exam Container -->
+  <div class="container" id="content" style="filter: blur(5px);">
+    <div class="question-card" id="question-card">
+      <button class="hamburger-btn" onclick="toggleProgress()">☰</button>
+    </div>
+  </div>
+
+  <!-- Progress Modal -->
+  <div class="progress-modal" id="progress-modal">
+    <header>
+      <h3>Questions</h3>
+      <button class="close-btn" onclick="toggleProgress()">×</button>
+    </header>
+    <div id="question-progress"></div>
+    <button onclick="submitTest()">Submit Test</button>
+  </div>
+
+<script>
+  // read URL params
+  const params    = new URLSearchParams(window.location.search);
+  const testID    = params.get("test")      || "";
+  let   batchName = params.get("batchName") || "";
+  let   username  = "";
+
+  // state
+  let testData    = {};
+  let subjectsArr = [];
+  let questions   = [];
+  let currentSubject = "";
+  let currentChapter = "";
+  let currentQuestionIndex = 0;
+  let timeLeft    = 0, timerInterval = null;
+  let tabSwitchCount = 0, maxTabSwitches = 5;
+
+  // show batch code
+  document.getElementById("logged-batch").textContent = batchName;
+
+  window.validateCredentials = async () => {
+    const u = document.getElementById("username").value.trim();
+    if (!u) return alert("Please enter your username.");
+    username = u;
+    document.getElementById("logged-username").textContent = username;
+    document.getElementById("modal-overlay").style.display = "none";
+    document.getElementById("content").style.filter = "none";
+    await loadTestSeriesData();
+  };
+
+  async function loadTestSeriesData() {
+    try {
+      const res = await fetch(`/api/testSeries/${testID}`);
+      if (!res.ok) throw new Error("Fetch failed");
+      testData = await res.json();
+      // set test name & timer
+      document.getElementById("test-name").textContent = testData.testName;
+      subjectsArr = testData.subjects;
+      timeLeft = (testData.testDuration || 90) * 60;  // fallback if needed
+      buildSubjectButtons();
+      currentSubject = subjectsArr[0];
+      if (testData.chapters[currentSubject].length) {
+        loadChapters(currentSubject);
+      } else {
+        currentChapter = "";
+        loadQuestions();
+      }
+      updateTimerDisplay();
+      startTimer();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to load test. Check console.");
+    }
+  }
+
+  function buildSubjectButtons() {
+    const sC = document.getElementById("subject-buttons");
+    sC.innerHTML = "";
+    subjectsArr.forEach(sub => {
+      const btn = document.createElement("button");
+      btn.textContent = sub;
+      btn.onclick = () => { currentSubject = sub; refreshChapterOrQuestions(); };
+      sC.appendChild(btn);
+    });
+    updateSubjectButtons();
+  }
+
+  function refreshChapterOrQuestions() {
+    updateSubjectButtons();
+    const chs = testData.chapters[currentSubject];
+    if (chs.length) loadChapters(currentSubject);
+    else {
+      currentChapter = "";
+      document.getElementById("chapter-buttons").innerHTML = "";
+      loadQuestions();
+    }
+  }
+
+  function updateSubjectButtons() {
+    document.querySelectorAll("#subject-buttons button")
+      .forEach(b => b.classList.toggle("activeSubject", b.textContent === currentSubject));
+  }
+
+  function loadChapters(sub) {
+    const cC = document.getElementById("chapter-buttons");
+    cC.innerHTML = "";
+    testData.chapters[sub].forEach(ch => {
+      const btn = document.createElement("button");
+      btn.textContent = ch;
+      btn.onclick = () => { currentChapter = ch; updateChapterButtons(); loadQuestions(); };
+      cC.appendChild(btn);
+    });
+    currentChapter = testData.chapters[sub][0];
+    updateChapterButtons();
+    loadQuestions();
+  }
+
+  function updateChapterButtons() {
+    document.querySelectorAll("#chapter-buttons button")
+      .forEach(b => b.classList.toggle("activeChapter", b.textContent === currentChapter));
+  }
+
+  async function loadQuestions() {
+    // pull all questions for this subject
+    const qMap = testData.questions[currentSubject] || {};
+    questions = Object.values(qMap);
+    // optionally filter by chapter
+    if (currentChapter) {
+      questions = questions.filter(q => q.chapter === currentChapter);
+    }
+    // sort MCQs first
+    questions.sort((a,b) => {
+      const ai = !Array.isArray(a.options)||!a.options.length;
+      const bi = !Array.isArray(b.options)||!b.options.length;
+      return ai - bi;
+    });
+    currentQuestionIndex = 0;
+    // mark visited in localStorage
+    if (questions.length) {
+      localStorage.setItem(
+        `visited_${currentSubject}_${currentChapter}_${questions[0].questionId}`,
+        "true"
+      );
+    }
+    displayQuestion();
+    updateNavInfo();
+    updateProgress();
+  }
+
+  function displayQuestion() {
+    const q = questions[currentQuestionIndex];
+    const c = document.getElementById("question-card");
+    if (!q) return c.innerHTML = "<p>No question available.</p>";
+    const isURL = s => /https?:\/\/.*\.(png|jpe?g|gif|svg)$/i.test(s);
+    const saved = localStorage.getItem(`response_${currentSubject}_${currentChapter}_${q.questionId}`) || "";
+    const rev   = localStorage.getItem(`review_${currentSubject}_${currentChapter}_${q.questionId}`) === "true";
+
+    let html = `
+      <button class="hamburger-btn" onclick="toggleProgress()">☰</button>
+      <p class="question-number">Question ${currentQuestionIndex+1}</p>
+      <div class="question-text">${
+        isURL(q.question)
+          ? `<img src="${q.question}" class="question-image"/>`
+          : q.question
+      }</div>
+      <div class="review-container">
+        <input type="checkbox" id="review-checkbox" ${rev?"checked":""}/>
+        <label for="review-checkbox">Mark for Review</label>
+      </div>
+      <div class="option-container">
+    `;
+
+    if (Array.isArray(q.options) && q.options.length) {
+      q.options.forEach((opt,i) => {
+        const val = String.fromCharCode(65 + i);
+        const chk = saved === val ? "checked" : "";
+        html += `
+          <div class="image-option">
+            <input type="radio"
+                   name="opt_${q.questionId}"
+                   id="opt_${q.questionId}_${i}"
+                   value="${val}"
+                   ${chk}
+                   onchange="toggleRadio(event,'${q.questionId}')">
+            <label for="opt_${q.questionId}_${i}">
+              <div class="option-content">${
+                isURL(opt) ? `<img src="${opt}" class="option-image"/>` : opt
+              }</div>
+            </label>
+          </div>
+        `;
+      });
+    } else {
+      html += `
+        <div class="input-answer">
+          <label>Your Answer:</label>
+          <input type="number" id="answer-input" value="${saved}"/>
+        </div>
+      `;
+    }
+
+    html += `
+      </div>
+      <div class="button-container">
+        <button onclick="goToPrevious()">Previous</button>
+        <button onclick="saveAndNext()">Save & Next</button>
+      </div>
+    `;
+
+    c.innerHTML = html;
+  }
+
+  window.toggleRadio = (e,qId) => {
+    const key = `response_${currentSubject}_${currentChapter}_${qId}`;
+    if (e.target.checked) localStorage.setItem(key, e.target.value);
+    else localStorage.removeItem(key);
+  };
+
+  window.saveAndNext = () => {
+    // save numeric answer
+    const inp = document.getElementById("answer-input");
+    if (inp) {
+      const key = `response_${currentSubject}_${currentChapter}_${questions[currentQuestionIndex].questionId}`;
+      inp.value.trim()
+        ? localStorage.setItem(key, inp.value.trim())
+        : localStorage.removeItem(key);
+    }
+    // save review
+    const cb = document.getElementById("review-checkbox");
+    if (cb) {
+      const rkey = `review_${currentSubject}_${currentChapter}_${questions[currentQuestionIndex].questionId}`;
+      cb.checked ? localStorage.setItem(rkey,"true") : localStorage.removeItem(rkey);
+    }
+
+    // advance
+    if (currentQuestionIndex < questions.length - 1) {
+      currentQuestionIndex++;
+    } else {
+      const idx = subjectsArr.indexOf(currentSubject);
+      currentSubject = subjectsArr[(idx+1) % subjectsArr.length];
+      refreshChapterOrQuestions();
+      return;
+    }
+
+    // mark visited
+    const nextQ = questions[currentQuestionIndex];
+    localStorage.setItem(
+      `visited_${currentSubject}_${currentChapter}_${nextQ.questionId}`,
+      "true"
+    );
+
+    displayQuestion();
+    updateNavInfo();
+    updateProgress();
+  };
+
+  window.goToPrevious = () => {
+    if (currentQuestionIndex > 0) {
+      currentQuestionIndex--;
+      displayQuestion();
+      updateNavInfo();
+      updateProgress();
+    }
+  };
+
+  function updateNavInfo() {
+    document.getElementById("current-subject").textContent = currentSubject;
+    document.getElementById("current-question-index").textContent = currentQuestionIndex+1;
+    document.getElementById("total-questions").textContent = questions.length;
+  }
+
+  function updateProgress() {
+    const prog = document.getElementById("question-progress");
+    prog.innerHTML = "";
+    questions.forEach((q,i) => {
+      const span = document.createElement("span");
+      span.textContent = i+1;
+      const baseKey  = `response_${currentSubject}_${currentChapter}_${q.questionId}`;
+      const revKey   = `review_${currentSubject}_${currentChapter}_${q.questionId}`;
+      const visitKey = `visited_${currentSubject}_${currentChapter}_${q.questionId}`;
+      const hasAns  = !!localStorage.getItem(baseKey);
+      const isRev   = !!localStorage.getItem(revKey);
+      const isVis   = !!localStorage.getItem(visitKey);
+
+      span.style.color = "#222";
+      if (hasAns && isRev)      span.style.background = "#d6d6d6";
+      else if (hasAns)          span.style.background = "#8ee08e";
+      else if (isRev)           span.style.background = "#c78cff";
+      else if (isVis)           span.style.background = "#ff8a8a";
+      else                      span.style.background = "#fff";
+
+      span.onclick = () => {
+        currentQuestionIndex = i;
+        localStorage.setItem(
+          `visited_${currentSubject}_${currentChapter}_${q.questionId}`, "true"
+        );
+        displayQuestion();
+        updateNavInfo();
+        updateProgress();
+      };
+
+      prog.appendChild(span);
+    });
+  }
+
+  window.toggleProgress = () => {
+    const m = document.getElementById("progress-modal");
+    m.style.display = (m.style.display==="block" ? "none" : "block");
+  };
+
+  // ### Timer ###
+  function updateTimerDisplay() {
+    const h = String(Math.floor(timeLeft/3600)).padStart(2,'0');
+    const m = String(Math.floor((timeLeft%3600)/60)).padStart(2,'0');
+    const s = String(timeLeft%60).padStart(2,'0');
+    document.getElementById("time-left").textContent = `${h}:${m}:${s}`;
+  }
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimerDisplay();
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        submitTest(true);
+      }
+    }, 1000);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      tabSwitchCount++;
+      if (tabSwitchCount >= maxTabSwitches) submitTest(true);
+      else alert("Too many tab switches will auto-submit the test.");
+    }
+  });
+
+  // ### Submission ###
+  window.submitTest = async function(auto=false) {
+    if (!auto && !confirm("Submit test now?")) return;
+    const payload = {};
+    for (const sub of subjectsArr) {
+      payload[sub] = {};
+      const qMap = testData.questions[sub] || {};
+      Object.values(qMap).forEach(q => {
+        const key = `response_${sub}_${currentChapter}_${q.questionId}`;
+        payload[sub][q.questionId] = {
+          questionId: q.questionId,
+          selectedAnswer: localStorage.getItem(key) || null
+        };
+      });
+    }
+    await fetch(`/api/tests/${testID}/submit`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        batchName, username, responses: payload
+      })
+    });
+    localStorage.clear();
+    alert(auto ? "Auto-submitted." : "Submitted successfully!");
+    window.location.href = auto
+      ? "result.html"
+      : `results.html?test=${testID}&batch=${encodeURIComponent(batchName)}&username=${encodeURIComponent(username)}`;
+  };
+</script>
+</body>
+</html>

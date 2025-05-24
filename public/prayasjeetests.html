@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#009688" />
+  <link rel="icon" sizes="192x192" href="icon-192.png">
+  <title>Test Series - PWiansZone</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --primary-color: #1E40AF;        /* Primary blue */
+  --secondary-color: #2563EB;      /* Lighter blue for highlights */
+  --accent-color: #9333EA;         /* Purple accent for contrast */
+  --light-bg: #F1F5F9;             /* Light slate background */
+  --white: #ffffff;
+  --text-color: #1E293B;           /* Slate‑900 */
+  --card-shadow: rgba(0, 0, 0, 0.08);
+  --hover-bg: rgba(30, 64, 175, 0.05);
+}
+
+body.dark-mode {
+  --primary-color: #60A5FA;        /* Light blue */
+  --secondary-color: #3B82F6;      /* Slightly deeper */
+  --accent-color: #C084FC;         /* Light purple */
+  --light-bg: #0F172A;             /* Slate‑900 */
+  --white: #1E293B;                /* Slate‑800 */
+  --text-color: #E2E8F0;           /* Light text */
+  --card-shadow: rgba(0, 0, 0, 0.4);
+  --hover-bg: rgba(96, 165, 250, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: var(--light-bg);
+  color: var(--text-color);
+  transition: background .3s, color .3s;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: var(--white);
+  box-shadow: 0 4px 10px var(--card-shadow);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+  font-size: .9rem;
+  width: 180px;
+  max-width: 60vw;
+}
+
+.search-btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  background: var(--primary-color);
+  color: var(--white);
+  cursor: pointer;
+}
+
+.dark-toggle {
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: color .3s;
+}
+
+.dark-toggle:hover {
+  color: var(--primary-color);
+}
+
+.main-content {
+  padding: 80px 20px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.test-series h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+}
+
+.test-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--white);
+  box-shadow: 0 2px 6px var(--card-shadow);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  transition: transform .2s;
+  cursor: pointer;
+}
+
+.test-card:hover {
+  transform: translateY(-3px);
+  background: var(--hover-bg);
+}
+
+.test-card.scheduled {
+  cursor: default;
+  transform: none;
+}
+
+.test-card h3 {
+  font-size: 1.2rem;
+  color: var(--secondary-color);
+}
+
+.test-card p {
+  font-size: .95rem;
+  margin-top: 4px;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.syllabus-btn {
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.syllabus-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+.syllabus-btn:active {
+  transform: translateY(0);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modal-content {
+  background: var(--white);
+  width: 90%;
+  max-width: 500px;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: slideDown 0.3s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--primary-color);
+  color: var(--white);
+  padding: 12px 16px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.close {
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 16px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-body h4 {
+  margin-top: 12px;
+  margin-bottom: 6px;
+  color: var(--secondary-color);
+}
+
+.modal-body ul {
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+
+.modal-body li {
+  margin-bottom: 4px;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">PWiansZone</div>
+    <div class="nav-right">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search tests…" />
+      <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i></button>
+      <button id="darkToggle" class="dark-toggle"><i class="fas fa-moon"></i></button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="test-series">
+      <h2 id="batchTitle">Loading batch…</h2>
+      <div id="testSeriesContainer">Loading tests…</div>
+    </section>
+  </main>
+
+  <div id="syllabusModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="syllabusTitle">Syllabus</h3>
+        <span id="syllabusClose" class="close">&times;</span>
+      </div>
+      <div id="syllabusContent" class="modal-body">Loading…</div>
+    </div>
+  </div>
+
+<script>
+  // 1️⃣ Read and normalize ?batchID=
+  function getParam(name, def = '') {
+    return new URLSearchParams(window.location.search).get(name) || def;
+  }
+  const rawBatchCode = getParam('batchID', 'BATCH002');
+  const batchCode = rawBatchCode.startsWith('BATCH')
+    ? rawBatchCode.replace(/^BATCH/, 'B')
+    : rawBatchCode;
+  const batchName = getParam('batchName', 'Prayas JEE 1.0');
+  document.getElementById('batchTitle').textContent = batchName;
+
+  // 2️⃣ Simple fetch helper
+  const api = (path, opts = {}) =>
+    fetch('/api/' + path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...opts
+    }).then(r => r.json());
+
+  let allTests = [];
+
+  // 3️⃣ Fetch tests and filter by t.batch.BatchID === batchCode
+  async function fetchAndRender() {
+    const container = document.getElementById('testSeriesContainer');
+    container.textContent = 'Loading tests…';
+
+    try {
+      const tests = await api('tests');
+      console.log('raw /api/tests →', tests);
+      allTests = tests.filter(t =>
+        t.batch && t.batch.BatchID === batchCode
+      );
+      renderTests(allTests);
+    } catch (err) {
+      console.error(err);
+      container.textContent = 'Error loading tests.';
+    }
+  }
+
+  // 4️⃣ Render function
+  function renderTests(list) {
+    const container = document.getElementById('testSeriesContainer');
+    container.innerHTML = '';
+    if (!list.length) {
+      container.textContent = 'No tests found for this batch.';
+      return;
+    }
+    list.forEach(t => {
+      const future = !t.published && t.scheduledAt && new Date(t.scheduledAt) > new Date();
+      const card = document.createElement('div');
+      card.className = 'test-card' + (t.published ? '' : ' scheduled');
+
+      card.innerHTML = `
+        <div>
+          <h3>${t.testName}</h3>
+          <p>Duration: ${t.testDuration} minutes</p>
+          <p>Subjects: ${t.subjects.join(', ')}</p>
+          ${future
+            ? `<p style="color:var(--accent-color)">Starts on: ${new Date(t.scheduledAt).toLocaleString()}</p>`
+            : ''}
+          <div class="card-actions">
+            <button class="syllabus-btn">Syllabus</button>
+          </div>
+        </div>
+        <div>${t.published ? '<i class="fas fa-arrow-right"></i>' : ''}</div>
+      `;
+
+      if (t.published) {
+        card.addEventListener('click', () => {
+          const params = new URLSearchParams({
+            test:      t._id,
+            batchID:   batchCode,
+            batchName
+          });
+          window.location.href = `testpage.html?${params}`;
+        });
+      }
+
+      card.querySelector('.syllabus-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        openSyllabus(t._id, t.testName, t.subjects);
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+  // 5️⃣ Search
+  function filterTests() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    renderTests(
+      q
+        ? allTests.filter(t => t.testName.toLowerCase().includes(q))
+        : allTests
+    );
+  }
+  document.getElementById('searchBtn').addEventListener('click', filterTests);
+  document.getElementById('searchInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') filterTests();
+  });
+
+  // 6️⃣ Dark-mode toggle
+  document.getElementById('darkToggle').addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const icon = document.body.classList.contains('dark-mode') ? 'fa-sun' : 'fa-moon';
+    document.getElementById('darkToggle').innerHTML = `<i class="fas ${icon}"></i>`;
+  });
+
+  // 7️⃣ Syllabus modal wiring
+  const syllabusModal   = document.getElementById('syllabusModal');
+  const syllabusTitle   = document.getElementById('syllabusTitle');
+  const syllabusContent = document.getElementById('syllabusContent');
+  document.getElementById('syllabusClose').onclick = () =>
+    (syllabusModal.style.display = 'none');
+  window.addEventListener('click', e => {
+    if (e.target === syllabusModal) syllabusModal.style.display = 'none';
+  });
+
+  // 8️⃣ Load and show chapters
+  async function openSyllabus(testId, title, subjects) {
+    syllabusTitle.textContent   = `Syllabus: ${title}`;
+    syllabusContent.innerHTML   = '<p>Loading chapters…</p>';
+    syllabusModal.style.display = 'flex';
+    try {
+      const data = await Promise.all(
+        subjects.map(subj =>
+          api(`chapters/${testId}/${subj}`)
+            .then(res => ({ subject: subj, chapters: res.chapters || [] }))
+        )
+      );
+      let html = '';
+      data.forEach(({ subject, chapters }) => {
+        html += `<h4>${subject}</h4>`;
+        html += chapters.length
+          ? '<ul>' + chapters.map(c => `<li>${c}</li>`).join('') + '</ul>'
+          : `<p style="color:var(--accent-color)"><em>No chapters available.</em></p>`;
+      });
+      syllabusContent.innerHTML = html;
+    } catch (err) {
+      console.error(err);
+      syllabusContent.innerHTML = `<p style="color:red;">Failed to load syllabus.</p>`;
+    }
+  }
+
+  // 9️⃣ Kick off
+  fetchAndRender();
+</script>
+
+</body>
+</html>
