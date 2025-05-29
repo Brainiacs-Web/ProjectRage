@@ -753,11 +753,11 @@ input:focus,
   }
 
   // Get parameters
-  const rawBatchCode = getParam('batchID', 'BATCH002');
+  const rawBatchCode = getParam('batchID', 'BATCH004');
   const batchCode = rawBatchCode.startsWith('BATCH')
     ? rawBatchCode.replace(/^BATCH/, 'B')
     : rawBatchCode;
-  const batchName = getParam('batchName', 'Arjuna JEE 1.0');
+  const batchName = getParam('batchName', 'Parishram 2026');
 
   // Update page title
   document.getElementById('batchTitle').innerHTML = `
