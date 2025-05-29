@@ -29,6 +29,20 @@
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Dark mode variables */
+body.dark-mode {
+  --primary-color: #60a5fa;
+  --secondary-color: #3b82f6;
+  --accent-color: #c084fc;
+  --light-bg: #0f172a;
+  --white: #1e293b;
+  --text-color: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --hover-bg: rgba(96, 165, 250, 0.1);
+  --border-color: #334155;
+}
+
 /* Base Reset */
 * {
   margin: 0;
@@ -65,12 +79,20 @@ body {
   top: 0;
   z-index: 100;
   box-shadow: 0 1px 3px var(--card-shadow);
+  transition: background-color var(--transition), border-color var(--transition);
 }
 
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
   text-align: center;
+  flex: 1;
 }
 
 .header-title {
@@ -88,6 +110,64 @@ body {
   font-size: 14px;
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 2px solid var(--border-color);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: var(--primary-color);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+  opacity: 0.1;
+}
+
+.theme-toggle:hover::before {
+  width: 60px;
+  height: 60px;
+}
+
+.theme-toggle:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.theme-toggle i {
+  font-size: 18px;
+  transition: transform var(--transition);
+  position: relative;
+  z-index: 1;
+}
+
+.theme-toggle:hover i {
+  transform: rotate(180deg);
 }
 
 /* Main Content */
@@ -199,6 +279,7 @@ body {
   box-shadow: 0 2px 8px var(--card-shadow);
   margin-bottom: 24px;
   overflow: hidden;
+  transition: background-color var(--transition), border-color var(--transition);
 }
 
 .overview-header {
@@ -317,6 +398,7 @@ body {
   border: 1px solid var(--border-color);
   box-shadow: 0 2px 8px var(--card-shadow);
   overflow: hidden;
+  transition: background-color var(--transition), border-color var(--transition);
 }
 
 .questions-header {
@@ -326,6 +408,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background-color var(--transition), border-color var(--transition);
 }
 
 .questions-title {
@@ -341,6 +424,7 @@ body {
   padding: 4px 12px;
   border-radius: 12px;
   border: 1px solid var(--border-color);
+  transition: background-color var(--transition), border-color var(--transition);
 }
 
 .questions-content {
@@ -353,6 +437,7 @@ body {
   border-radius: var(--border-radius-sm);
   overflow: hidden;
   margin-bottom: 20px;
+  transition: border-color var(--transition);
 }
 
 .question-header {
@@ -639,6 +724,10 @@ body {
     font-size: 28px;
   }
   
+  .header-left {
+    text-align: left;
+  }
+  
   .main-content {
     padding: 32px 20px;
   }
@@ -687,6 +776,16 @@ body {
 
 /* Mobile specific adjustments */
 @media (max-width: 767px) {
+  .header-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .header-actions {
+    order: -1;
+    align-self: flex-end;
+  }
+  
   .overview-content {
     flex-direction: column;
     gap: 20px;
@@ -734,11 +833,18 @@ button:focus,
     <!-- Header -->
     <header class="results-header">
       <div class="header-content">
-        <h1 class="header-title">
-          <i class="fas fa-chart-line"></i>
-          Test Results
-        </h1>
-        <p class="header-subtitle">Detailed analysis of your performance</p>
+        <div class="header-left">
+          <h1 class="header-title">
+            <i class="fas fa-chart-line"></i>
+            Test Results
+          </h1>
+          <p class="header-subtitle">Detailed analysis of your performance</p>
+        </div>
+        <div class="header-actions">
+          <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -822,6 +928,44 @@ button:focus,
   </div>
 
 <script>
+  // Dark mode functionality
+  let isDarkMode = localStorage.getItem('darkMode') === 'true';
+  const themeToggle = document.getElementById('themeToggle');
+  const body = document.body;
+
+  // Initialize dark mode
+  function initializeDarkMode() {
+    if (isDarkMode) {
+      body.classList.add('dark-mode');
+      themeToggle.querySelector('i').className = 'fas fa-sun';
+    } else {
+      body.classList.remove('dark-mode');
+      themeToggle.querySelector('i').className = 'fas fa-moon';
+    }
+  }
+
+  // Toggle dark mode
+  function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    body.classList.toggle('dark-mode', isDarkMode);
+    localStorage.setItem('darkMode', isDarkMode);
+    
+    // Update icon with animation
+    const icon = themeToggle.querySelector('i');
+    icon.style.transform = 'rotate(180deg) scale(0.8)';
+    
+    setTimeout(() => {
+      icon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+      icon.style.transform = 'rotate(0deg) scale(1)';
+    }, 150);
+  }
+
+  // Event listener for theme toggle
+  themeToggle.addEventListener('click', toggleDarkMode);
+
+  // Initialize on page load
+  initializeDarkMode();
+
   // Utility functions
   function getParam(name) {
     return new URLSearchParams(window.location.search).get(name) || '';
@@ -919,7 +1063,7 @@ button:focus,
     });
   }
 
-  // Render statistics cards
+  // Render statistics cards with new marking scheme
   function renderStats(totalCorrect, totalWrong, totalUnanswered, totalScore) {
     const statsGrid = document.getElementById('stats-grid');
     
@@ -1117,13 +1261,13 @@ button:focus,
     }
   }
 
-  // Main function to display results
+  // Main function to display results with new marking scheme
   async function displayResults() {
     try {
       resultsData = await fetchResults();
       const { testName, subjects, results } = resultsData;
 
-      // Calculate totals
+      // Calculate totals with new marking scheme: +4 correct, -1 wrong, 0 unanswered
       let totalCorrect = 0;
       let totalWrong = 0;
       let totalUnanswered = 0;
@@ -1136,11 +1280,13 @@ button:focus,
           
           if (!selected) {
             totalUnanswered++;
+            // 0 points for unanswered
           } else if (selected === correct) {
             totalCorrect++;
-            totalScore++;
+            totalScore += 4; // +4 for correct answer
           } else {
             totalWrong++;
+            totalScore -= 1; // -1 for wrong answer
           }
         });
       });

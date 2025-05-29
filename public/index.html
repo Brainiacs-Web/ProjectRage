@@ -46,6 +46,19 @@
       --delay-step: 0.1s;
     }
 
+    /* Dark mode variables */
+    body.dark-mode {
+      --clr-primary: #60a5fa;
+      --clr-accent: #3b82f6;
+      --clr-bg: #0f172a;
+      --clr-surface: #1e293b;
+      --clr-text: #e2e8f0;
+      --clr-text-secondary: #94a3b8;
+      --clr-border: #334155;
+      --clr-shadow: rgba(0, 0, 0, 0.3);
+      --shadow-heavy: 0 8px 25px rgba(96, 165, 250, 0.25);
+    }
+
     *,
     *::before,
     *::after {
@@ -70,6 +83,7 @@
       flex-direction: column;
       opacity: 0;
       animation: pageLoad 0.8s ease-out forwards;
+      transition: background-color var(--trans-smooth), color var(--trans-smooth);
     }
 
     @keyframes pageLoad {
@@ -108,6 +122,7 @@
       z-index: 100;
       transform: translateY(-100%);
       animation: headerSlide 0.6s ease-out 0.2s forwards;
+      transition: background-color var(--trans-smooth), border-color var(--trans-smooth);
     }
 
     @keyframes headerSlide {
@@ -153,6 +168,64 @@
 
     .header .logo:hover {
       transform: translateY(-2px);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-round);
+      background: var(--clr-surface);
+      border: 2px solid var(--clr-border);
+      color: var(--clr-text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--trans-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .theme-toggle::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: var(--clr-primary);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.3s ease;
+      opacity: 0.1;
+    }
+
+    .theme-toggle:hover::before {
+      width: 60px;
+      height: 60px;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--clr-primary);
+      color: var(--clr-primary);
+      transform: scale(1.1);
+    }
+
+    .theme-toggle .material-icons {
+      font-size: 20px;
+      transition: transform var(--trans-smooth);
+      position: relative;
+      z-index: 1;
+    }
+
+    .theme-toggle:hover .material-icons {
+      transform: rotate(180deg);
     }
 
     .unlock-btn {
@@ -391,8 +464,10 @@
       opacity: 0;
       transform: translateY(40px);
       transition: transform var(--trans-medium) var(--ease-std),
-                  box-shadow var(--trans-medium) var(--ease-std);
+                  box-shadow var(--trans-medium) var(--ease-std),
+                  background-color var(--trans-smooth);
       animation: fadeInUp 0.4s var(--ease-std) forwards;
+      border: 1px solid var(--clr-border);
     }
 
     .flash-card::before {
@@ -447,6 +522,10 @@
       pointer-events: none;
       z-index: 200;
       transition: all 0.3s ease;
+    }
+
+    body.dark-mode #overlay {
+      background-color: rgba(15, 23, 42, 0.95);
     }
 
     #overlay.overlay-anim {
@@ -557,6 +636,23 @@
     }
 
     @media (max-width: 768px) {
+      .header .container {
+        padding: var(--space-sm) var(--space-md);
+      }
+      
+      .header-actions {
+        gap: var(--space-sm);
+      }
+      
+      .theme-toggle {
+        width: 36px;
+        height: 36px;
+      }
+      
+      .theme-toggle .material-icons {
+        font-size: 18px;
+      }
+      
       .tabs {
         gap: var(--space-sm);
       }
@@ -592,10 +688,15 @@
   <header class="header">
     <div class="container">
       <div class="logo">PWiansZone</div>
-      <button id="unlockHeaderBtn" class="unlock-btn" aria-label="Unlock Access">
-        <span class="material-icons">lock_open</span>
-        Unlock Access
-      </button>
+      <div class="header-actions">
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <span class="material-icons">dark_mode</span>
+        </button>
+        <button id="unlockHeaderBtn" class="unlock-btn" aria-label="Unlock Access">
+          <span class="material-icons">lock_open</span>
+          Unlock Access
+        </button>
+      </div>
     </div>
   </header>
 
@@ -634,6 +735,45 @@
   </div>
 
   <script>
+    // Dark mode functionality
+    let isDarkMode = localStorage.getItem('darkMode') === 'true';
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    // Initialize dark mode
+    function initializeDarkMode() {
+      if (isDarkMode) {
+        body.classList.add('dark-mode');
+        themeToggle.querySelector('.material-icons').textContent = 'light_mode';
+      } else {
+        body.classList.remove('dark-mode');
+        themeToggle.querySelector('.material-icons').textContent = 'dark_mode';
+      }
+    }
+
+    // Toggle dark mode
+    function toggleDarkMode() {
+      isDarkMode = !isDarkMode;
+      body.classList.toggle('dark-mode', isDarkMode);
+      localStorage.setItem('darkMode', isDarkMode);
+      
+      // Update icon with animation
+      const icon = themeToggle.querySelector('.material-icons');
+      icon.style.transform = 'rotate(180deg) scale(0.8)';
+      
+      setTimeout(() => {
+        icon.textContent = isDarkMode ? 'light_mode' : 'dark_mode';
+        icon.style.transform = 'rotate(0deg) scale(1)';
+      }, 150);
+    }
+
+    // Event listener for theme toggle
+    themeToggle.addEventListener('click', toggleDarkMode);
+
+    // Initialize on page load
+    initializeDarkMode();
+
+    // Existing code
     const EXP_MS = 12 * 60 * 60 * 1000;
     const rawTs = localStorage.getItem("keyTimestamp");
     const storedTs = rawTs ? parseInt(rawTs, 10) : null;

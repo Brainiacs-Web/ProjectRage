@@ -454,6 +454,20 @@ body {
   font-family: inherit;
 }
 
+/* Text formatting helper */
+.text-format-helper {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.text-format-helper i {
+  color: var(--primary);
+}
+
 /* Modern Buttons */
 .btn {
   display: inline-flex;
@@ -1215,7 +1229,7 @@ textarea:focus-visible {
         <section id="add-question-section" class="section hidden">
           <div class="page-header">
             <h1 class="page-title">Add Questions</h1>
-            <p class="page-subtitle">Add questions to your test series</p>
+            <p class="page-subtitle">Add questions to your test series with advanced text formatting</p>
           </div>
 
           <div class="card">
@@ -1264,6 +1278,10 @@ textarea:focus-visible {
                       Question Text
                     </label>
                     <textarea id="question" class="form-textarea" placeholder="Enter your question here..."></textarea>
+                    <div class="text-format-helper">
+                      <i class="fas fa-keyboard"></i>
+                      <span>Ctrl+U for superscript, Ctrl+D for subscript</span>
+                    </div>
                   </div>
 
                   <div class="form-group">
@@ -1288,18 +1306,34 @@ textarea:focus-visible {
                       <div class="form-group">
                         <label class="form-label" for="optionA">Option A</label>
                         <input type="text" id="optionA" class="form-input" placeholder="Enter option A" />
+                        <div class="text-format-helper">
+                          <i class="fas fa-keyboard"></i>
+                          <span>Ctrl+U for superscript, Ctrl+D for subscript</span>
+                        </div>
                       </div>
                       <div class="form-group">
                         <label class="form-label" for="optionB">Option B</label>
                         <input type="text" id="optionB" class="form-input" placeholder="Enter option B" />
+                        <div class="text-format-helper">
+                          <i class="fas fa-keyboard"></i>
+                          <span>Ctrl+U for superscript, Ctrl+D for subscript</span>
+                        </div>
                       </div>
                       <div class="form-group">
                         <label class="form-label" for="optionC">Option C</label>
                         <input type="text" id="optionC" class="form-input" placeholder="Enter option C" />
+                        <div class="text-format-helper">
+                          <i class="fas fa-keyboard"></i>
+                          <span>Ctrl+U for superscript, Ctrl+D for subscript</span>
+                        </div>
                       </div>
                       <div class="form-group">
                         <label class="form-label" for="optionD">Option D</label>
                         <input type="text" id="optionD" class="form-input" placeholder="Enter option D" />
+                        <div class="text-format-helper">
+                          <i class="fas fa-keyboard"></i>
+                          <span>Ctrl+U for superscript, Ctrl+D for subscript</span>
+                        </div>
                       </div>
                     </div>
                     <div class="form-group" style="margin-top: 24px;">
@@ -1338,6 +1372,10 @@ textarea:focus-visible {
                       Solution Explanation
                     </label>
                     <textarea id="solution" class="form-textarea" placeholder="Explain the solution step by step..."></textarea>
+                    <div class="text-format-helper">
+                      <i class="fas fa-keyboard"></i>
+                      <span>Ctrl+U for superscript, Ctrl+D for subscript</span>
+                    </div>
                   </div>
                 </div>
 
@@ -1513,6 +1551,45 @@ textarea:focus-visible {
   </div>
 
 <script>
+  // Text formatting functionality
+  function wrapSelectedText(element, tag) {
+    const start = element.selectionStart;
+    const end = element.selectionEnd;
+    const selectedText = element.value.substring(start, end);
+    
+    if (selectedText) {
+      const beforeText = element.value.substring(0, start);
+      const afterText = element.value.substring(end);
+      const wrappedText = `<${tag}>${selectedText}</${tag}>`;
+      
+      element.value = beforeText + wrappedText + afterText;
+      
+      // Set cursor position after the wrapped text
+      const newPosition = start + wrappedText.length;
+      element.setSelectionRange(newPosition, newPosition);
+      element.focus();
+      
+      showToast(`Text formatted as ${tag}`, 'success');
+    } else {
+      showToast('Please select text first', 'info');
+    }
+  }
+
+  function addTextFormattingToElement(element) {
+    element.addEventListener('keydown', function(e) {
+      // Ctrl+U for superscript
+      if (e.ctrlKey && e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        wrapSelectedText(this, 'sup');
+      }
+      // Ctrl+D for subscript
+      else if (e.ctrlKey && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        wrapSelectedText(this, 'sub');
+      }
+    });
+  }
+
   // Theme management
   const themeToggle = document.getElementById('themeToggle');
   const body = document.body;
@@ -1908,6 +1985,23 @@ textarea:focus-visible {
 
   // Initialize when DOM is loaded
   document.addEventListener('DOMContentLoaded', () => {
+    // Add text formatting to all relevant text inputs and textareas
+    const textElements = [
+      'question',
+      'solution',
+      'optionA',
+      'optionB', 
+      'optionC',
+      'optionD'
+    ];
+    
+    textElements.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        addTextFormattingToElement(element);
+      }
+    });
+
     // Tab switching
     document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
       item.addEventListener('click', (e) => {

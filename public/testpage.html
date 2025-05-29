@@ -638,6 +638,34 @@ body {
   transform: translateY(-2px);
 }
 
+/* Dark Mode Toggle */
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--card-shadow);
+  z-index: 999;
+  border: none;
+  transition: var(--transition);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+.theme-toggle i {
+  font-size: 20px;
+}
+
 /* Animations */
 @keyframes fadeIn {
   to { opacity: 1; }
@@ -834,7 +862,6 @@ input:focus,
     <!-- Navigation Tabs -->
     <nav class="nav-section">
       <div class="nav-tabs" id="subject-buttons"></div>
-      <div class="nav-tabs" id="chapter-buttons"></div>
     </nav>
 
     <!-- Main Content -->
@@ -851,6 +878,11 @@ input:focus,
         </div>
       </div>
     </main>
+
+    <!-- Dark Mode Toggle Button -->
+    <button class="theme-toggle" id="theme-toggle">
+      <i class="fas fa-moon"></i>
+    </button>
   </div>
 
   <!-- Progress Modal -->
@@ -894,10 +926,25 @@ input:focus,
   let subjectsArr = [];
   let questions = [];
   let currentSubject = "";
-  let currentChapter = "";
   let currentQuestionIndex = 0;
   let timeLeft = 0, timerInterval = null;
   let tabSwitchCount = 0, maxTabSwitches = 5;
+  let isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+  // Initialize dark mode
+  if (isDarkMode) {
+    document.body.classList.add('dark-mode');
+    document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+  }
+
+  // Dark mode toggle
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    document.getElementById('theme-toggle').innerHTML = isDarkMode ? 
+      '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    localStorage.setItem('darkMode', isDarkMode);
+  });
 
   // Show batch code
   document.getElementById("logged-batch").textContent = batchName;
@@ -929,12 +976,8 @@ input:focus,
       buildSubjectButtons();
       currentSubject = subjectsArr[0];
       
-      if (testData.chapters[currentSubject].length) {
-        loadChapters(currentSubject);
-      } else {
-        currentChapter = "";
-        loadQuestions();
-      }
+      // Directly load questions without chapter logic
+      loadQuestions();
       
       updateTimerDisplay();
       startTimer();
@@ -956,23 +999,12 @@ input:focus,
       btn.textContent = sub;
       btn.onclick = () => {
         currentSubject = sub;
-        refreshChapterOrQuestions();
+        updateSubjectButtons();
+        loadQuestions();
       };
       container.appendChild(btn);
     });
     updateSubjectButtons();
-  }
-
-  function refreshChapterOrQuestions() {
-    updateSubjectButtons();
-    const chapters = testData.chapters[currentSubject];
-    if (chapters.length) {
-      loadChapters(currentSubject);
-    } else {
-      currentChapter = "";
-      document.getElementById("chapter-buttons").innerHTML = "";
-      loadQuestions();
-    }
   }
 
   function updateSubjectButtons() {
@@ -980,41 +1012,11 @@ input:focus,
       .forEach(btn => btn.classList.toggle("active", btn.textContent === currentSubject));
   }
 
-  function loadChapters(subject) {
-    const container = document.getElementById("chapter-buttons");
-    container.innerHTML = "";
-    
-    testData.chapters[subject].forEach(chapter => {
-      const btn = document.createElement("button");
-      btn.className = "nav-tab";
-      btn.textContent = chapter;
-      btn.onclick = () => {
-        currentChapter = chapter;
-        updateChapterButtons();
-        loadQuestions();
-      };
-      container.appendChild(btn);
-    });
-    
-    currentChapter = testData.chapters[subject][0];
-    updateChapterButtons();
-    loadQuestions();
-  }
-
-  function updateChapterButtons() {
-    document.querySelectorAll("#chapter-buttons .nav-tab")
-      .forEach(btn => btn.classList.toggle("active", btn.textContent === currentChapter));
-  }
-
   async function loadQuestions() {
     showLoading(true);
     
     const questionMap = testData.questions[currentSubject] || {};
     questions = Object.values(questionMap);
-    
-    if (currentChapter) {
-      questions = questions.filter(q => q.chapter === currentChapter);
-    }
     
     // Sort MCQs first
     questions.sort((a, b) => {
@@ -1183,7 +1185,8 @@ input:focus,
       const currentIndex = subjectsArr.indexOf(currentSubject);
       if (currentIndex < subjectsArr.length - 1) {
         currentSubject = subjectsArr[currentIndex + 1];
-        refreshChapterOrQuestions();
+        updateSubjectButtons();
+        loadQuestions();
         return;
       } else {
         showToast("You've completed all questions!", "success");
@@ -1259,22 +1262,23 @@ input:focus,
 
   // Local Storage Helpers
   function saveAnswer(questionId, answer) {
-    const key = `response_${currentSubject}_${currentChapter}_${questionId}`;
+    const key = `response_${currentSubject}_${questionId}`;
     localStorage.setItem(key, answer);
+    console.log(`Saved answer: ${key} = ${answer}`); // Debug log
   }
 
   function getSavedAnswer(questionId) {
-    const key = `response_${currentSubject}_${currentChapter}_${questionId}`;
+    const key = `response_${currentSubject}_${questionId}`;
     return localStorage.getItem(key) || "";
   }
 
   function removeAnswer(questionId) {
-    const key = `response_${currentSubject}_${currentChapter}_${questionId}`;
+    const key = `response_${currentSubject}_${questionId}`;
     localStorage.removeItem(key);
   }
 
   function saveReview(questionId, isReviewed) {
-    const key = `review_${currentSubject}_${currentChapter}_${questionId}`;
+    const key = `review_${currentSubject}_${questionId}`;
     if (isReviewed) {
       localStorage.setItem(key, "true");
     } else {
@@ -1283,17 +1287,17 @@ input:focus,
   }
 
   function getSavedReview(questionId) {
-    const key = `review_${currentSubject}_${currentChapter}_${questionId}`;
+    const key = `review_${currentSubject}_${questionId}`;
     return localStorage.getItem(key) === "true";
   }
 
   function markAsVisited(questionId) {
-    const key = `visited_${currentSubject}_${currentChapter}_${questionId}`;
+    const key = `visited_${currentSubject}_${questionId}`;
     localStorage.setItem(key, "true");
   }
 
   function getSavedVisited(questionId) {
-    const key = `visited_${currentSubject}_${currentChapter}_${questionId}`;
+    const key = `visited_${currentSubject}_${questionId}`;
     return localStorage.getItem(key) === "true";
   }
 
@@ -1341,84 +1345,71 @@ input:focus,
   });
 
   // Test Submission
- // ### Fixed Submission Function ###
-window.submitTest = async function(auto = false) {
-  if (!auto && !confirm("Are you sure you want to submit the test?")) {
-    return;
-  }
+  window.submitTest = async function(auto = false) {
+    if (!auto && !confirm("Are you sure you want to submit the test?")) {
+      return;
+    }
 
-  try {
-    showLoading(true);
-    
-    // Build the payload correctly
-    const payload = {};
-    
-    for (const subject of subjectsArr) {
-      payload[subject] = {};
-      const questionMap = testData.questions[subject] || {};
+    try {
+      showLoading(true);
       
-      Object.values(questionMap).forEach(question => {
-        // Use the same key format as when saving
-        const key = `response_${subject}_${currentChapter}_${question.questionId}`;
-        const savedAnswer = localStorage.getItem(key);
+      // Build the payload correctly
+      const payload = {};
+      
+      for (const subject of subjectsArr) {
+        payload[subject] = {};
+        const questionMap = testData.questions[subject] || {};
         
-        payload[subject][question.questionId] = {
-          questionId: question.questionId,
-          selectedAnswer: savedAnswer || null
-        };
+        Object.values(questionMap).forEach(question => {
+          // Use the same key format as when saving
+          const key = `response_${subject}_${question.questionId}`;
+          const savedAnswer = localStorage.getItem(key);
+          
+          payload[subject][question.questionId] = {
+            questionId: question.questionId,
+            selectedAnswer: savedAnswer || null
+          };
+        });
+      }
+
+      console.log('Submitting payload:', payload); // Debug log
+
+      const response = await fetch(`/api/tests/${testID}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          batchName,
+          username,
+          responses: payload
+        })
       });
+
+      if (!response.ok) {
+        throw new Error(`Submission failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Submission result:', result); // Debug log
+
+      // Clear localStorage and redirect
+      localStorage.clear();
+      clearInterval(timerInterval);
+      
+      showToast(auto ? "Test auto-submitted successfully!" : "Test submitted successfully!", "success");
+      
+      setTimeout(() => {
+        window.location.href = auto 
+          ? "result.html" 
+          : `results.html?test=${testID}&batch=${encodeURIComponent(batchName)}&username=${encodeURIComponent(username)}`;
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Submission error:", error);
+      showToast("Failed to submit test. Please try again.", "error");
+      showLoading(false);
     }
+  };
 
-    console.log('Submitting payload:', payload); // Debug log
-
-    const response = await fetch(`/api/tests/${testID}/submit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        batchName,
-        username,
-        responses: payload
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Submission failed: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log('Submission result:', result); // Debug log
-
-    // Clear localStorage and redirect
-    localStorage.clear();
-    clearInterval(timerInterval);
-    
-    showToast(auto ? "Test auto-submitted successfully!" : "Test submitted successfully!", "success");
-    
-    setTimeout(() => {
-      window.location.href = auto 
-        ? "result.html" 
-        : `results.html?test=${testID}&batch=${encodeURIComponent(batchName)}&username=${encodeURIComponent(username)}`;
-    }, 2000);
-    
-  } catch (error) {
-    console.error("Submission error:", error);
-    showToast("Failed to submit test. Please try again.", "error");
-    showLoading(false);
-  }
-};
-
-// Also update the saveAnswer function to ensure proper key format
-function saveAnswer(questionId, answer) {
-  // Make sure we're using the current chapter context
-  const key = `response_${currentSubject}_${currentChapter}_${questionId}`;
-  localStorage.setItem(key, answer);
-  console.log(`Saved answer: ${key} = ${answer}`); // Debug log
-}
-
-function getSavedAnswer(questionId) {
-  const key = `response_${currentSubject}_${currentChapter}_${questionId}`;
-  return localStorage.getItem(key) || "";
-}
   // Utility Functions
   function showLoading(show) {
     const content = document.getElementById("content");
