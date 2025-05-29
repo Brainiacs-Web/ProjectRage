@@ -2,445 +2,1188 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport"
-        content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
-  <title>Test Results</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <title>PWians Test Results</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect"
-        href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
-        rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
- :root {
-      --blue: #007adf;
-      --light-blue: #56b4ef;
-      --green: #28a745;
-      --red: #dc3545;
-      --yellow: #ffc107;
-      --bg-start: #e0f2ff;
-      --bg-end: #f7faff;
-      --card-radius: 10px;
-      --font-base: 14px;
-    }
-    * {
-      margin: 0; padding: 0; box-sizing: border-box;
-      font-family: "Poppins", sans-serif;
-      font-size: var(--font-base);
-    }
-    body {
-      background: linear-gradient(to bottom, var(--bg-start), var(--bg-end));
-      color: #333;
-      line-height: 1.4;
-      overflow-x: hidden;
-    }
+:root {
+  --primary-color: #1E40AF;
+  --secondary-color: #2563EB;
+  --accent-color: #9333EA;
+  --light-bg: #F8FAFC;
+  --white: #ffffff;
+  --text-color: #1E293B;
+  --text-secondary: #64748B;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --hover-bg: rgba(30, 64, 175, 0.05);
+  --border-color: #E2E8F0;
+  --success-color: #10B981;
+  --warning-color: #F59E0B;
+  --error-color: #EF4444;
+  --border-radius: 16px;
+  --border-radius-sm: 8px;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-    /* Top Header */
-    .top-container {
-      position: sticky; top: 0; background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(5px); padding: 14px; text-align: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08); z-index: 10;
-    }
-    .top-container h1 {
-      color: var(--blue);
-      font-size: 18px;
-      font-weight: 600;
-    }
+/* Base Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    /* Main wrapper */
-    .container {
-      max-width: 860px;
-      margin: 20px auto;
-      padding: 0 12px 30px;
-    }
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--light-bg);
+  color: var(--text-color);
+  overflow-x: hidden;
+  transition: var(--transition);
+  line-height: 1.5;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
 
-    /* Metric cards row */
-    #totalResult {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .metric-card {
-      background: #fff;
-      border-radius: var(--card-radius);
-      padding: 14px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .metric-card.correct { border-top: 4px solid var(--green); }
-    .metric-card.wrong   { border-top: 4px solid var(--red); }
-    .metric-card.unans   { border-top: 4px solid var(--yellow); }
-    .metric-card.score   { border-top: 4px solid var(--blue); }
-    .metric-card h2 {
-      font-size: 1.6rem;
-      margin: 6px 0 4px;
-      color: var(--blue);
-    }
-    .metric-card p {
-      font-size: 0.9rem;
-      color: #555;
-    }
+/* App Container */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-    /* Info card: legend + overall chart */
-    .info-card {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      background: #fff;
-      border-radius: var(--card-radius);
-      padding: 16px 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      margin-bottom: 24px;
-    }
-    .info-left {
-      flex: 0 1 auto;
-    }
-    .info-right {
-      flex: 0 0 auto;
-      margin-left: 16px;
-      width: 100px;
-      height: 100px;
-    }
-    .info-right canvas {
-      max-width: 100%;
-      max-height: 100%;
-    }
-    .legend {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      font-size: 0.9rem;
-      color: #444;
-    }
-    .legend-color {
-      width: 12px; height: 12px;
-      border-radius: 2px;
-      margin-right: 8px;
-    }
-    .legend-color.green  { background: var(--green); }
-    .legend-color.red    { background: var(--red); }
-    .legend-color.yellow { background: var(--yellow); }
+/* Header */
+.results-header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border-color);
+  padding: 20px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px var(--card-shadow);
+}
 
-    /* Subject tabs */
-    #buttonsContainer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-    #buttonsContainer button {
-      padding: 6px 16px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #555;
-      background: #fff;
-      border: 2px solid var(--light-blue);
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all .2s;
-    }
-    #buttonsContainer button.active-button {
-      background: var(--light-blue);
-      color: #fff;
-      border-color: var(--light-blue);
-    }
-    #buttonsContainer button:hover {
-      background: var(--light-blue);
-      color: #fff;
-    }
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
 
-    /* Question card */
-    .question-box {
-      background: #fff;
-      border-radius: var(--card-radius);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      margin-bottom: 28px;
-      overflow: hidden;
-    }
-    .question-header {
-      background: var(--light-blue);
-      color: #fff;
-      padding: 10px 14px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      position: relative;
-    }
-    .question-header::after {
-      content: '';
-      position: absolute; bottom: 0; left: 0;
-      height: 3px;
-      width: var(--progress, 0%);
-      background: var(--green);
-      transition: width .2s;
-    }
-    .question-body { padding: 14px; }
-    .options { list-style: none; padding: 0; margin-bottom: 12px; }
-    .option-box {
-      background: #f9f9f9;
-      padding: 8px 12px;
-      margin: 6px 0;
-      border-radius: 6px;
-      border: 2px solid #ececec;
-      font-weight: 500;
-      font-size: 0.9rem;
-    }
-    .option-box.correct {
-      background: #d4edda!important;
-      border-color: var(--green)!important;
-      color: #155724;
-    }
-    .feedback {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .feedback span {
-      flex: 1 1 45%;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-weight: 500;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    .selected-correct { background: var(--green); color: #fff; }
-    .selected-wrong   { background: var(--red);   color: #fff; }
-    .correct-answer   { background: #d4edda; color: #155724; }
-    .solution {
-      padding: 10px 12px;
-      background: #f1f1f1;
-      border-left: 4px solid var(--blue);
-      font-style: italic;
-      font-size: 0.9rem;
-      color: #444;
-    }
+.header-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
 
-    /* Pagination */
-    .pager {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 36px;
-    }
-    .pager button {
-      padding: 6px 12px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border: none;
-      border-radius: 6px;
-      background: var(--blue);
-      color: #fff;
-      cursor: pointer;
-      transition: opacity .2s;
-    }
-    .pager button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+.header-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
 
-    @media (max-width: 600px) {
-      .container { padding: 0 8px 20px; }
-      #totalResult { grid-template-columns: repeat(auto-fit, minmax(100px,1fr)); }
-      .question-header { padding: 8px 10px; }
-      .question-body { padding: 12px; }
-      .info-card { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .info-right { margin: 0; }
-    }  </style>
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 20px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-color);
+}
+
+.stat-card.correct::before { background: var(--success-color); }
+.stat-card.wrong::before { background: var(--error-color); }
+.stat-card.unanswered::before { background: var(--warning-color); }
+.stat-card.score::before { background: var(--primary-color); }
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--card-shadow);
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-color);
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 20px;
+  opacity: 0.3;
+}
+
+.stat-card.correct .stat-icon { color: var(--success-color); }
+.stat-card.wrong .stat-icon { color: var(--error-color); }
+.stat-card.unanswered .stat-icon { color: var(--warning-color); }
+.stat-card.score .stat-icon { color: var(--primary-color); }
+
+/* Overview Card */
+.overview-card {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px var(--card-shadow);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.overview-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.overview-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.overview-content {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.legend-section {
+  flex: 1;
+}
+
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-dot.correct { background: var(--success-color); }
+.legend-dot.wrong { background: var(--error-color); }
+.legend-dot.unanswered { background: var(--warning-color); }
+
+.chart-section {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+}
+
+.chart-section canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Subject Navigation */
+.subject-nav {
+  margin-bottom: 24px;
+}
+
+.subject-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.subject-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.subject-tab {
+  background: var(--white);
+  border: 2px solid var(--border-color);
+  color: var(--text-color);
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  min-width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subject-tab.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
+}
+
+.subject-tab:hover:not(.active) {
+  background: var(--hover-bg);
+  border-color: var(--primary-color);
+}
+
+/* Questions Section */
+.questions-section {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px var(--card-shadow);
+  overflow: hidden;
+}
+
+.questions-header {
+  background: var(--light-bg);
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.questions-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.question-counter {
+  font-size: 14px;
+  color: var(--text-secondary);
+  background: var(--white);
+  padding: 4px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.questions-content {
+  padding: 20px;
+}
+
+/* Question Card */
+.question-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.question-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.question-number {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.question-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.question-status.correct {
+  background: var(--success-color);
+  color: white;
+}
+
+.question-status.wrong {
+  background: var(--error-color);
+  color: white;
+}
+
+.question-status.unanswered {
+  background: var(--warning-color);
+  color: white;
+}
+
+.question-body {
+  padding: 20px;
+}
+
+.question-text {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.question-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-sm);
+  margin: 12px 0;
+  box-shadow: 0 2px 8px var(--card-shadow);
+}
+
+/* Options */
+.options-list {
+  list-style: none;
+  margin-bottom: 20px;
+}
+
+.option-item {
+  background: var(--light-bg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: var(--transition);
+}
+
+.option-item.correct {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--success-color);
+  color: var(--success-color);
+  font-weight: 600;
+}
+
+.option-item.selected {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--error-color);
+  color: var(--error-color);
+  font-weight: 600;
+}
+
+.option-item.selected.correct {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+/* Answer Summary */
+.answer-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.answer-item {
+  padding: 12px 16px;
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.answer-item.your-answer {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error-color);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.answer-item.correct-answer {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.answer-item.your-answer.correct {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Solution */
+.solution-section {
+  background: rgba(30, 64, 175, 0.05);
+  border: 1px solid rgba(30, 64, 175, 0.1);
+  border-radius: var(--border-radius-sm);
+  padding: 16px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.solution-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.solution-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+/* Navigation */
+.question-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.nav-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.nav-btn.primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.nav-btn.secondary {
+  background: var(--white);
+  color: var(--text-color);
+  border: 2px solid var(--border-color);
+}
+
+.nav-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--card-shadow);
+}
+
+.nav-btn.primary:hover {
+  background: var(--secondary-color);
+}
+
+.nav-btn.secondary:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.empty-text {
+  font-size: 14px;
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--error-color);
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.error-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.error-text {
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.retry-btn {
+  background: var(--error-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.retry-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  body { font-size: 16px; }
+  
+  .results-header {
+    padding: 24px 20px;
+  }
+  
+  .header-title {
+    font-size: 28px;
+  }
+  
+  .main-content {
+    padding: 32px 20px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  
+  .overview-content {
+    padding: 32px;
+  }
+  
+  .legend-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .chart-section {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .questions-content {
+    padding: 32px;
+  }
+  
+  .question-body {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .overview-content {
+    gap: 40px;
+  }
+  
+  .chart-section {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .answer-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 767px) {
+  .overview-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .chart-section {
+    width: 100px;
+    height: 100px;
+    align-self: center;
+  }
+  
+  .legend-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .question-nav {
+    flex-direction: column;
+  }
+  
+  .nav-btn {
+    justify-content: center;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles */
+button:focus,
+.subject-tab:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+  </style>
 </head>
 <body>
-  <div class="top-container"><h1>Test Results</h1></div>
-  <div class="container">
-    <div id="totalResult">Loading results…</div>
-    <div class="info-card">
-      <div class="info-left">
-        <h3>Overall Analysis</h3>
-        <div class="legend">
-          <div class="legend-item"><div class="legend-color green"></div><span>Correct</span></div>
-          <div class="legend-item"><div class="legend-color red"></div><span>Wrong</span></div>
-          <div class="legend-item"><div class="legend-color yellow"></div><span>Unanswered</span></div>
-        </div>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="results-header">
+      <div class="header-content">
+        <h1 class="header-title">
+          <i class="fas fa-chart-line"></i>
+          Test Results
+        </h1>
+        <p class="header-subtitle">Detailed analysis of your performance</p>
       </div>
-      <div class="info-right">
-        <canvas id="overallChart"></canvas>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Loading State -->
+      <div class="loading-container" id="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading your results...</p>
       </div>
-    </div>
-    <div id="buttonsContainer"></div>
-    <div id="sectionResult">
-      <p style="text-align:center;color:#777;">Select a subject to begin.</p>
-    </div>
-  </div>
 
-  <script>
-    // Utility to read URL params
-    function getParam(name) {
-      return new URLSearchParams(window.location.search).get(name) || '';
-    }
+      <!-- Results Content -->
+      <div id="results-content" style="display: none;">
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="stats-grid"></div>
 
-    const testID    = getParam('test');
-    const batchName = getParam('batch');
-    const username  = getParam('username');
-
-    if (!testID || !batchName || !username) {
-      document.body.innerHTML = '<p style="color:red;">Missing URL parameters.</p>';
-      throw new Error('Missing URL parameters');
-    }
-
-    // Fetch results from backend
-    async function fetchResults() {
-      const res = await fetch(
-        `/api/tests/${encodeURIComponent(testID)}/results`
-        + `?batchName=${encodeURIComponent(batchName)}`
-        + `&username=${encodeURIComponent(username)}`
-      );
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Failed to load results');
-      }
-      return res.json();
-    }
-
-    function drawDoughnut(ctx, data) {
-      new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Correct','Wrong','Unanswered'],
-          datasets: [{ data, backgroundColor: ['#28a745','#dc3545','#ffc107'] }]
-        },
-        options: { plugins:{ legend:{ display:false } }, cutout: '60%' }
-      });
-    }
-
-    function formatTextWithImages(text) {
-      return (text || '').replace(
-        /(https?:\/\/[^\s]+)/g,
-        url => `<img src="${url}" style="max-width:100%;margin-top:4px;">`
-      );
-    }
-
-    async function displayResults() {
-      const { testName, subjects, results } = await fetchResults();
-
-      // 1) Metrics
-      let totalC=0, totalW=0, totalU=0, totalScore=0;
-      Object.entries(results).forEach(([subj, qs]) => {
-        qs.forEach(q => {
-          const sel = (q.selectedAnswer || '').trim().toUpperCase();
-          const corr= (q.correctAnswer||'').trim().toUpperCase();
-          if (!sel) totalU++;
-          else if (sel===corr) { totalC++; totalScore++; }
-          else totalW++;
-        });
-      });
-      document.getElementById('totalResult').innerHTML = `
-        <div class="metric-card correct">
-          <h2>${totalC}</h2><p>Correct</p>
-        </div>
-        <div class="metric-card wrong">
-          <h2>${totalW}</h2><p>Wrong</p>
-        </div>
-        <div class="metric-card unans">
-          <h2>${totalU}</h2><p>Unanswered</p>
-        </div>
-        <div class="metric-card score">
-          <h2>${totalScore}</h2><p>Score</p>
-        </div>
-      `;
-
-      // 2) Doughnut
-      drawDoughnut(
-        document.getElementById('overallChart').getContext('2d'),
-        [totalC, totalW, totalU]
-      );
-
-      // 3) Subject tabs
-      const bc = document.getElementById('buttonsContainer');
-      subjects.forEach((subj, idx) => {
-        const btn = document.createElement('button');
-        btn.textContent = subj;
-        btn.onclick = () => showSubject(idx);
-        bc.appendChild(btn);
-      });
-
-      function showSubject(idx) {
-        // highlight button
-        bc.querySelectorAll('button').forEach((b,i) => {
-          b.classList.toggle('active-button', i===idx);
-        });
-
-        // render questions for this subject
-        const qs = results[subjects[idx]];
-        let qi = 0;
-        const container = document.getElementById('sectionResult');
-        container.innerHTML = `
-          <div id="questionContainer"></div>
-          <div class="pager">
-            <button id="prevBtn">Previous</button>
-            <button id="nextBtn">Next</button>
+        <!-- Overview Card -->
+        <div class="overview-card">
+          <div class="overview-header">
+            <i class="fas fa-chart-pie"></i>
+            <h2 class="overview-title">Performance Overview</h2>
           </div>
-        `;
-        const qCont = document.getElementById('questionContainer');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-
-        function render() {
-          const { question, options, correctAnswer, solution, selectedAnswer } = qs[qi];
-          const pct = Math.round(((qi+1)/qs.length)*100);
-
-          qCont.innerHTML = `
-            <div class="question-box">
-              <div class="question-header" style="--progress:${pct}%">
-                Q${qi+1}/${qs.length}: ${formatTextWithImages(question)}
-              </div>
-              <div class="question-body">
-                <ul class="options">
-                  ${options.map(o => {
-                    const oTxt = formatTextWithImages(o);
-                    const cls = o.trim().toUpperCase() === correctAnswer.trim().toUpperCase()
-                      ? ' correct' : '';
-                    return `<li class="option-box${cls}">${oTxt}</li>`;
-                  }).join('')}
-                </ul>
-                <div class="feedback">
-                  <span class="${selectedAnswer.trim().toUpperCase()===correctAnswer.trim().toUpperCase()
-                                  ? 'selected-correct':'selected-wrong'}">
-                    Your Answer: ${selectedAnswer||'–'}
-                  </span>
-                  ${selectedAnswer.trim().toUpperCase()===correctAnswer.trim().toUpperCase()
-                    ? ''
-                    : `<span class="correct-answer">Correct: ${correctAnswer}</span>`}
+          <div class="overview-content">
+            <div class="legend-section">
+              <div class="legend-grid">
+                <div class="legend-item">
+                  <div class="legend-dot correct"></div>
+                  <span>Correct Answers</span>
                 </div>
-                <div class="solution">
-                  <strong>Solution:</strong> ${formatTextWithImages(solution)}
+                <div class="legend-item">
+                  <div class="legend-dot wrong"></div>
+                  <span>Wrong Answers</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot unanswered"></div>
+                  <span>Unanswered</span>
                 </div>
               </div>
             </div>
-          `;
-          prevBtn.disabled = qi === 0;
-          nextBtn.disabled = qi === qs.length - 1;
-        }
+            <div class="chart-section">
+              <canvas id="overview-chart"></canvas>
+            </div>
+          </div>
+        </div>
 
-        prevBtn.onclick = () => { if (qi>0) { qi--; render(); } };
-        nextBtn.onclick = () => { if (qi<qs.length-1) { qi++; render(); } };
-        render();
+        <!-- Subject Navigation -->
+        <div class="subject-nav">
+          <div class="subject-tabs" id="subject-tabs"></div>
+        </div>
+
+        <!-- Questions Section -->
+        <div class="questions-section">
+          <div class="questions-header">
+            <h3 class="questions-title">Question Analysis</h3>
+            <div class="question-counter" id="question-counter">Question 1 of 10</div>
+          </div>
+          <div class="questions-content" id="questions-content">
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-book-open"></i>
+              </div>
+              <h3 class="empty-title">Select a Subject</h3>
+              <p class="empty-text">Choose a subject from the tabs above to view detailed question analysis</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div class="error-state" id="error-state" style="display: none;">
+        <div class="error-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="error-title">Unable to Load Results</h3>
+        <p class="error-text" id="error-message">Something went wrong while loading your test results.</p>
+        <button class="retry-btn" onclick="location.reload()">
+          <i class="fas fa-redo"></i> Try Again
+        </button>
+      </div>
+    </main>
+  </div>
+
+<script>
+  // Utility functions
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name) || '';
+  }
+
+  function formatTextWithImages(text) {
+    if (!text) return '';
+    return text.replace(
+      /(https?:\/\/[^\s]+\.(png|jpe?g|gif|svg))/gi,
+      url => `<img src="${url}" class="question-image" alt="Question image">`
+    );
+  }
+
+  function showError(message) {
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('results-content').style.display = 'none';
+    document.getElementById('error-state').style.display = 'block';
+    document.getElementById('error-message').textContent = message;
+  }
+
+  function showResults() {
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('error-state').style.display = 'none';
+    document.getElementById('results-content').style.display = 'block';
+  }
+
+  // Get URL parameters
+  const testID = getParam('test');
+  const batchName = getParam('batch');
+  const username = getParam('username');
+
+  if (!testID || !batchName || !username) {
+    showError('Missing required parameters. Please check the URL and try again.');
+    throw new Error('Missing URL parameters');
+  }
+
+  // Global variables
+  let resultsData = null;
+  let currentSubject = '';
+  let currentQuestionIndex = 0;
+  let currentSubjectQuestions = [];
+
+  // Fetch results from backend
+  async function fetchResults() {
+    try {
+      const response = await fetch(
+        `/api/tests/${encodeURIComponent(testID)}/results` +
+        `?batchName=${encodeURIComponent(batchName)}` +
+        `&username=${encodeURIComponent(username)}`
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to load results');
       }
 
-      // click first tab
-      bc.firstChild && bc.firstChild.click();
+      return await response.json();
+    } catch (error) {
+      console.error('Fetch error:', error);
+      throw error;
+    }
+  }
+
+  // Create doughnut chart
+  function createDoughnutChart(ctx, data) {
+    return new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Correct', 'Wrong', 'Unanswered'],
+        datasets: [{
+          data: data,
+          backgroundColor: ['#10B981', '#EF4444', '#F59E0B'],
+          borderWidth: 0,
+          cutout: '70%'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: 'white',
+            bodyColor: 'white',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderWidth: 1,
+            cornerRadius: 8,
+            displayColors: true
+          }
+        }
+      }
+    });
+  }
+
+  // Render statistics cards
+  function renderStats(totalCorrect, totalWrong, totalUnanswered, totalScore) {
+    const statsGrid = document.getElementById('stats-grid');
+    
+    statsGrid.innerHTML = `
+      <div class="stat-card correct">
+        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-number">${totalCorrect}</div>
+        <div class="stat-label">Correct</div>
+      </div>
+      <div class="stat-card wrong">
+        <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+        <div class="stat-number">${totalWrong}</div>
+        <div class="stat-label">Wrong</div>
+      </div>
+      <div class="stat-card unanswered">
+        <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
+        <div class="stat-number">${totalUnanswered}</div>
+        <div class="stat-label">Unanswered</div>
+      </div>
+      <div class="stat-card score">
+        <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+        <div class="stat-number">${totalScore}</div>
+        <div class="stat-label">Total Score</div>
+      </div>
+    `;
+  }
+
+  // Render subject tabs
+  function renderSubjectTabs(subjects) {
+    const tabsContainer = document.getElementById('subject-tabs');
+    tabsContainer.innerHTML = '';
+
+    subjects.forEach((subject, index) => {
+      const tab = document.createElement('button');
+      tab.className = 'subject-tab';
+      tab.innerHTML = `
+        <i class="fas fa-book"></i>
+        <span>${subject}</span>
+      `;
+      tab.onclick = () => selectSubject(subject, index);
+      tabsContainer.appendChild(tab);
+    });
+  }
+
+  // Select subject and show questions
+  function selectSubject(subject, index) {
+    currentSubject = subject;
+    currentSubjectQuestions = resultsData.results[subject] || [];
+    currentQuestionIndex = 0;
+
+    // Update active tab
+    document.querySelectorAll('.subject-tab').forEach((tab, i) => {
+      tab.classList.toggle('active', i === index);
+    });
+
+    renderQuestion();
+  }
+
+  // Render current question
+  function renderQuestion() {
+    const questionsContent = document.getElementById('questions-content');
+    const questionCounter = document.getElementById('question-counter');
+
+    if (!currentSubjectQuestions.length) {
+      questionsContent.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+          <h3 class="empty-title">No Questions Found</h3>
+          <p class="empty-text">No questions available for this subject</p>
+        </div>
+      `;
+      return;
     }
 
-    // start
-    window.onload = () => {
-      displayResults().catch(err => {
-        document.getElementById('sectionResult').innerHTML =
-          `<p style="color:red;text-align:center;">${err.message}</p>`;
-        console.error(err);
+    const question = currentSubjectQuestions[currentQuestionIndex];
+    const selectedAnswer = (question.selectedAnswer || '').trim().toUpperCase();
+    const correctAnswer = (question.correctAnswer || '').trim().toUpperCase();
+    const isCorrect = selectedAnswer === correctAnswer;
+    const isAnswered = selectedAnswer !== '';
+
+    // Update counter
+    questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${currentSubjectQuestions.length}`;
+
+    // Determine status
+    let status = 'unanswered';
+    if (isAnswered) {
+      status = isCorrect ? 'correct' : 'wrong';
+    }
+
+    // Render options
+    let optionsHTML = '';
+    if (question.options && question.options.length) {
+      optionsHTML = `
+        <ul class="options-list">
+          ${question.options.map(option => {
+            const optionUpper = option.trim().toUpperCase();
+            let classes = 'option-item';
+            
+            if (optionUpper === correctAnswer) {
+              classes += ' correct';
+            }
+            if (optionUpper === selectedAnswer && !isCorrect) {
+              classes += ' selected';
+            }
+            
+            return `<li class="${classes}">${formatTextWithImages(option)}</li>`;
+          }).join('')}
+        </ul>
+      `;
+    }
+
+    // Render answer summary
+    let answerSummaryHTML = '';
+    if (isAnswered) {
+      answerSummaryHTML = `
+        <div class="answer-summary">
+          <div class="answer-item your-answer ${isCorrect ? 'correct' : ''}">
+            <strong>Your Answer:</strong> ${selectedAnswer}
+          </div>
+          ${!isCorrect ? `
+            <div class="answer-item correct-answer">
+              <strong>Correct Answer:</strong> ${correctAnswer}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    } else {
+      answerSummaryHTML = `
+        <div class="answer-summary">
+          <div class="answer-item your-answer">
+            <strong>Your Answer:</strong> Not answered
+          </div>
+          <div class="answer-item correct-answer">
+            <strong>Correct Answer:</strong> ${correctAnswer}
+          </div>
+        </div>
+      `;
+    }
+
+    questionsContent.innerHTML = `
+      <div class="question-card">
+        <div class="question-header">
+          <div class="question-number">Question ${currentQuestionIndex + 1}</div>
+          <div class="question-status ${status}">
+            <i class="fas fa-${status === 'correct' ? 'check' : status === 'wrong' ? 'times' : 'question'}"></i>
+            ${status.charAt(0).toUpperCase() + status.slice(1)}
+          </div>
+        </div>
+        <div class="question-body">
+          <div class="question-text">
+            ${formatTextWithImages(question.question)}
+          </div>
+          
+          ${optionsHTML}
+          
+          ${answerSummaryHTML}
+          
+          <div class="solution-section">
+            <div class="solution-title">
+              <i class="fas fa-lightbulb"></i>
+              Solution
+            </div>
+            <div class="solution-text">
+              ${formatTextWithImages(question.solution || 'No solution provided.')}
+            </div>
+          </div>
+          
+          <div class="question-nav">
+            <button class="nav-btn secondary" onclick="previousQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>
+              <i class="fas fa-arrow-left"></i>
+              Previous
+            </button>
+            <button class="nav-btn primary" onclick="nextQuestion()" ${currentQuestionIndex === currentSubjectQuestions.length - 1 ? 'disabled' : ''}>
+              Next
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Navigation functions
+  function previousQuestion() {
+    if (currentQuestionIndex > 0) {
+      currentQuestionIndex--;
+      renderQuestion();
+    }
+  }
+
+  function nextQuestion() {
+    if (currentQuestionIndex < currentSubjectQuestions.length - 1) {
+      currentQuestionIndex++;
+      renderQuestion();
+    }
+  }
+
+  // Main function to display results
+  async function displayResults() {
+    try {
+      resultsData = await fetchResults();
+      const { testName, subjects, results } = resultsData;
+
+      // Calculate totals
+      let totalCorrect = 0;
+      let totalWrong = 0;
+      let totalUnanswered = 0;
+      let totalScore = 0;
+
+      Object.entries(results).forEach(([subject, questions]) => {
+        questions.forEach(question => {
+          const selected = (question.selectedAnswer || '').trim().toUpperCase();
+          const correct = (question.correctAnswer || '').trim().toUpperCase();
+          
+          if (!selected) {
+            totalUnanswered++;
+          } else if (selected === correct) {
+            totalCorrect++;
+            totalScore++;
+          } else {
+            totalWrong++;
+          }
+        });
       });
-    };
-  </script>
+
+      // Render components
+      renderStats(totalCorrect, totalWrong, totalUnanswered, totalScore);
+      
+      // Create chart
+      const chartCtx = document.getElementById('overview-chart').getContext('2d');
+      createDoughnutChart(chartCtx, [totalCorrect, totalWrong, totalUnanswered]);
+      
+      // Render subject tabs
+      renderSubjectTabs(subjects);
+      
+      // Select first subject by default
+      if (subjects.length > 0) {
+        selectSubject(subjects[0], 0);
+      }
+
+      showResults();
+    } catch (error) {
+      console.error('Error displaying results:', error);
+      showError(error.message || 'Failed to load results. Please try again.');
+    }
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      previousQuestion();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      nextQuestion();
+    }
+  });
+
+  // Initialize
+  window.addEventListener('load', displayResults);
+
+  // Make navigation functions global
+  window.previousQuestion = previousQuestion;
+  window.nextQuestion = nextQuestion;
+</script>
 </body>
 </html>

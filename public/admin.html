@@ -2,750 +2,2170 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title> Admin</title>
-  
-  <!-- Firebase SDK (for Firestore) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-  
-  <!-- Google Fonts and Font Awesome -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <title>PWians Admin Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
 :root {
-  --primary-color: #1E40AF;        /* Primary blue */
-  --secondary-color: #2563EB;      /* Lighter blue highlights */
-  --accent-color: #9333EA;         /* Purple accent */
-  --light-bg: #F1F5F9;             /* Light slate background */
-  --white: #ffffff;
-  --text-color: #1E293B;           /* Slate‑900 */
-  --hover-bg: rgba(30, 64, 175, 0.05);
-  --card-shadow: rgba(0, 0, 0, 0.08);
-  --transition-speed: 0.3s;
-  --sidebar-width: 240px;
+  --primary: #667eea;
+  --primary-dark: #5a67d8;
+  --secondary: #764ba2;
+  --accent: #f093fb;
+  --success: #48bb78;
+  --warning: #ed8936;
+  --error: #f56565;
+  --info: #4299e1;
+  
+  --bg-primary: #f7fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #edf2f7;
+  --bg-glass: rgba(255, 255, 255, 0.25);
+  
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --text-inverse: #ffffff;
+  
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body.dark-mode {
-  --primary-color: #60A5FA;        /* Light blue */
-  --secondary-color: #3B82F6;      /* Deeper light blue */
-  --accent-color: #C084FC;         /* Light purple */
-  --light-bg: #0F172A;             /* Dark slate */
-  --white: #1E293B;                /* Slate‑800 */
-  --text-color: #E2E8F0;           /* Light text */
-  --hover-bg: rgba(96, 165, 250, 0.1);
-  --card-shadow: rgba(0, 0, 0, 0.4);
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-glass: rgba(30, 41, 59, 0.8);
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  
+  --border: #334155;
+  --border-light: #475569;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
 }
 
 body {
-  background: var(--light-bg);
-  color: var(--text-color);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   line-height: 1.6;
-  transition: background var(--transition-speed), color var(--transition-speed);
+  font-size: 14px;
+  overflow-x: hidden;
+  transition: var(--transition);
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Modern scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* Layout */
-#admin-dashboard {
-  display: flex;
+.dashboard {
+  display: grid;
+  grid-template-columns: 280px 1fr;
   min-height: 100vh;
+  transition: var(--transition);
 }
+
+/* Sidebar */
 .sidebar {
-  position: fixed;
-  top: 0; left: 0;
-  width: var(--sidebar-width);
-  height: 100%;
-  background: var(--white);
-  box-shadow: 2px 0 5px var(--card-shadow);
-  padding: 25px 15px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.3;
+}
+
+.sidebar-content {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
   overflow-y: auto;
-  transition: transform var(--transition-speed);
+  padding: 0;
 }
-.sidebar h2 {
+
+.sidebar-header {
+  padding: 32px 24px;
   text-align: center;
-  margin-bottom: 30px;
-  color: var(--primary-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-.sidebar nav a {
-  display: block;
-  padding: 12px 15px;
-  margin-bottom: 15px;
-  color: var(--text-color);
-  border-radius: 6px;
-  transition: background var(--transition-speed), transform var(--transition-speed);
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: white;
+  text-decoration: none;
+  margin-bottom: 8px;
 }
-.sidebar nav a:hover,
-.sidebar nav a.active {
-  background: var(--hover-bg);
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  backdrop-filter: blur(10px);
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.logo-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.nav-menu {
+  padding: 24px 0;
+}
+
+.nav-section {
+  margin-bottom: 32px;
+}
+
+.nav-section-title {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  padding: 0 24px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  margin: 0 16px 8px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: var(--transition);
+}
+
+.nav-item:hover::before {
+  left: 100%;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
   transform: translateX(4px);
 }
 
-/* Bottom Nav for Mobile */
-.bottom-nav {
-  display: none;
-  position: fixed;
-  bottom: 0; left: 0;
-  width: 100%;
-  background: var(--white);
-  box-shadow: 0 -2px 5px var(--card-shadow);
-  padding: 8px 0;
-  justify-content: space-around;
-  z-index: 1100;
-}
-.bottom-nav a {
-  flex: 1;
-  text-align: center;
-  color: var(--text-color);
-  transition: background var(--transition-speed);
-}
-.bottom-nav a.active {
-  background: var(--hover-bg);
-  color: var(--primary-color);
-}
-.bottom-nav a i {
-  font-size: 1.5rem;
-}
-@media (max-width: 480px) {
-  .sidebar { display: none; }
-  .main-content {
-    margin-left: 0;
-    width: 100%;
-    padding: 20px;
-  }
-  .bottom-nav { display: flex; }
+.nav-item.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  box-shadow: var(--shadow-md);
 }
 
-/* FAB */
-.fab {
-  position: fixed;
-  bottom: 20px; right: 20px;
-  width: 50px; height: 50px;
-  background: var(--primary-color);
-  color: var(--white);
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 2rem;
-  box-shadow: 0 2px 5px var(--card-shadow);
-  transition: transform var(--transition-speed);
-  cursor: grab;
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: white;
+  border-radius: 2px 0 0 2px;
 }
-.fab:hover {
-  transform: scale(1.1);
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
 /* Main Content */
 .main-content {
-  margin-left: calc(var(--sidebar-width) + 20px);
-  padding: 40px 20px;
-  width: calc(100% - var(--sidebar-width) - 20px);
-  background: var(--light-bg);
-  transition: margin var(--transition-speed);
-}
-@media (max-width: 768px) {
-  .main-content { padding: 30px 15px; }
+  background: var(--bg-primary);
+  overflow-y: auto;
+  position: relative;
 }
 
-/* Cards & Forms */
+.content-wrapper {
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 32px;
+  animation: slideDown 0.6s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Modern Cards */
 .card {
-  background: var(--white);
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 10px var(--card-shadow);
-  margin-bottom: 30px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  margin-bottom: 32px;
+  transition: var(--transition);
+  animation: slideUp 0.6s ease-out;
 }
-.card h2 {
-  text-align: center;
-  color: var(--primary-color);
-  margin-bottom: 20px;
-  font-weight: 600;
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-form label {
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  padding: 24px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.card-body {
+  padding: 32px;
+}
+
+/* Modern Forms */
+.form-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.form-group {
+  position: relative;
+}
+
+.form-label {
   display: block;
-  margin-bottom: 10px;
+  font-size: 14px;
   font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-form input,
-form select,
-form textarea {
+
+.form-label i {
+  color: var(--primary);
+  font-size: 16px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
-  background: var(--white);
-}
-form input:focus,
-form select:focus,
-form textarea:focus {
+  padding: 16px 20px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: var(--transition);
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 5px var(--hover-bg);
 }
-form button {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 4px;
-  background: var(--primary-color);
-  color: var(--white);
-  cursor: pointer;
-  transition: background var(--transition-speed), transform var(--transition-speed);
-}
-form button:hover {
-  background: var(--secondary-color);
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
   transform: translateY(-2px);
 }
 
-/* Tables */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-table th,
-table td {
-  padding: 12px;
-  border: 1px solid #eee;
-  text-align: left;
-}
-table th {
-  background: var(--white);
-  font-weight: 600;
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
 }
 
-/* Modal */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+/* Modern Buttons */
+.btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-.modal-content {
-  background: var(--white);
-  padding: 30px;
-  width: 90%;
-  max-width: 600px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px var(--card-shadow);
-  position: relative;
-}
-.modal-content .close {
-  position: absolute;
-  top: 12px; right: 20px;
-  font-size: 1.5rem;
+  gap: 8px;
+  padding: 16px 24px;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
-  color: #aaa;
-  transition: color var(--transition-speed), transform var(--transition-speed);
-}
-.modal-content .close:hover {
-  color: var(--primary-color);
-  transform: rotate(90deg);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-/* Test Cards & Buttons */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: var(--transition);
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success), #38a169);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, var(--warning), #dd6b20);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--error), #e53e3e);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-sm {
+  padding: 12px 20px;
+  font-size: 13px;
+}
+
+/* Question Type Sections */
+.question-section {
+  background: linear-gradient(135deg, var(--bg-tertiary), rgba(102, 126, 234, 0.05));
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  margin-top: 24px;
+  transition: var(--transition);
+  animation: expandIn 0.4s ease-out;
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    transform: scaleY(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.question-section:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.question-title {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Test Cards */
 .test-card {
-  background: var(--white);
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  margin-bottom: 24px;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.test-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+}
+
+.test-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--primary);
+}
+
+.test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 24px;
+}
+
+.test-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.test-status {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.status-published {
+  background: rgba(72, 187, 120, 0.1);
+  color: var(--success);
+  border: 2px solid var(--success);
+}
+
+.status-scheduled {
+  background: rgba(237, 137, 54, 0.1);
+  color: var(--warning);
+  border: 2px solid var(--warning);
+}
+
+.status-ready {
+  background: rgba(102, 126, 234, 0.1);
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.test-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.test-detail {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: var(--transition-fast);
+}
+
+.test-detail:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: var(--primary);
+}
+
+.test-detail i {
+  color: var(--primary);
+  width: 16px;
+}
+
+/* Modern Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
   padding: 20px;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px var(--card-shadow);
+  backdrop-filter: blur(8px);
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border);
+  animation: modalSlide 0.3s ease-out;
+}
+
+@keyframes modalSlide {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  padding: 24px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-}
-.test-card h3 {
-  color: var(--primary-color);
-  margin-bottom: 8px;
-}
-.btn-group button {
-  padding: 10px 14px;
-  border: none;
-  border-radius: 4px;
-  background: var(--primary-color);
-  color: var(--white);
-  cursor: pointer;
-  transition: background var(--transition-speed), transform var(--transition-speed);
-}
-.btn-group button:hover {
-  background: var(--secondary-color);
-  transform: translateY(-2px);
 }
 
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 32px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab:hover {
+  transform: scale(1.1) translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Chapters List */
+.chapters-list {
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  margin-top: 24px;
+}
+
+.chapters-list ul {
+  list-style: none;
+}
+
+.chapters-list li {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: var(--transition-fast);
+}
+
+.chapters-list li:last-child {
+  border-bottom: none;
+}
+
+.chapters-list li:hover {
+  color: var(--primary);
+  transform: translateX(8px);
+}
+
+.chapters-list li::before {
+  content: '●';
+  color: var(--primary);
+  font-size: 16px;
+}
+
+/* Loading States */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 24px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--border);
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Toast Notifications */
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 16px 24px;
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 2000;
+  box-shadow: var(--shadow-lg);
+  transform: translateX(100%);
+  transition: var(--transition);
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(20px);
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast-success {
+  background: linear-gradient(135deg, var(--success), #38a169);
+  color: white;
+}
+
+.toast-error {
+  background: linear-gradient(135deg, var(--error), #e53e3e);
+  color: white;
+}
+
+.toast-info {
+  background: linear-gradient(135deg, var(--info), #3182ce);
+  color: white;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  padding: 16px 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+}
+
+.mobile-nav-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:hover {
+  color: var(--primary);
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.mobile-nav-item i {
+  font-size: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    display: none;
+  }
+  
+  .mobile-nav {
+    display: block;
+  }
+  
+  .content-wrapper {
+    padding: 24px 20px 100px;
+  }
+  
+  .fab {
+    bottom: 100px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .test-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-group .btn {
+    width: 100%;
+  }
+  
+  .page-title {
+    font-size: 24px;
+  }
+  
+  .modal-content {
+    margin: 16px;
+    max-height: calc(100vh - 32px);
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Section transitions */
+.section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.section.hidden {
+  display: none;
+}
+
+/* Focus styles */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
   </style>
 </head>
 <body>
-  <div id="admin-dashboard">
-    <div class="sidebar">
-      <h2>PWians</h2>
-      <nav>
-        <a href="#" data-tab="test-setup" class="active"><i class="fas fa-cogs"></i> Setup</a>
-        <a href="#" data-tab="add-question"><i class="fas fa-plus-circle"></i> Add Qs</a>
-        <a href="#" data-tab="test-preview"><i class="fas fa-eye"></i> Preview</a>
-        <a href="#" data-tab="chapters"><i class="fas fa-book"></i> Chapters</a>
-      </nav>
-    </div>
-    <div class="bottom-nav">
-      <a href="#" data-tab="test-setup" class="active"><i class="fas fa-cogs"></i></a>
-      <a href="#" data-tab="add-question"><i class="fas fa-plus-circle"></i></a>
-      <a href="#" data-tab="test-preview"><i class="fas fa-eye"></i></a>
-      <a href="#" data-tab="chapters"><i class="fas fa-book"></i></a>
-    </div>
-    <div class="fab" id="fab"><i class="fas fa-plus"></i></div>
-
-    <div class="main-content">
-      <section id="test-setup-section" class="card">
-        <h2>Setup</h2>
-        <form id="test-setup-form">
-          <label for="testName">Test Name</label>
-          <input type="text" id="testName" required />
-          <label for="batchSelect">Batch</label>
-          <select id="batchSelect" required><option value="">--Select Batch--</option></select>
-          <label for="testDuration">Duration (min)</label>
-          <input type="number" id="testDuration" required />
-          <label for="subjects">Subjects (comma-sep)</label>
-          <input type="text" id="subjects" placeholder="Physics, Chem, Bio" required />
-          <label for="scheduledDate">Schedule</label>
-          <input type="datetime-local" id="scheduledDate" required />
-          <button type="submit">Create Test</button>
-        </form>
-      </section>
-
-      <section id="add-question-section" class="card" style="display:none;">
-        <h2>Add Qs</h2>
-        <form id="question-form">
-          <label for="questionBatch">Batch</label>
-          <select id="questionBatch" required><option value="">--Select Batch--</option></select>
-          <label for="testSeries">Series</label>
-          <select id="testSeries" required><option value="">--Select Series--</option></select>
-          <label for="subject">Subject</label>
-          <select id="subject" required><option value="">--Select Subject--</option></select>
-          <label for="question">Question</label>
-          <input type="text" id="question" placeholder="Enter question" />
-          <label for="questionImageURL">Image URL</label>
-          <input type="text" id="questionImageURL" placeholder="Paste image URL" />
-          <label for="questionType">Type</label>
-          <select id="questionType" required>
-            <option value="">--Select Type--</option>
-            <option value="MCQ">MCQ</option>
-            <option value="Integer">Integer</option>
-          </select>
-          <div id="mcq-section" style="display:none;">
-            <div style="display:flex;gap:10px;">
-              <div style="flex:1;">
-                <label for="optionA">A</label>
-                <input type="text" id="optionA" placeholder="Option A" />
-              </div>
-              <div style="flex:1;">
-                <label for="optionB">B</label>
-                <input type="text" id="optionB" placeholder="Option B" />
-              </div>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-content">
+        <div class="sidebar-header">
+          <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+          </button>
+          <a href="#" class="logo">
+            <div class="logo-icon">
+              <i class="fas fa-graduation-cap"></i>
             </div>
-            <div style="display:flex;gap:10px;">
-              <div style="flex:1;">
-                <label for="optionC">C</label>
-                <input type="text" id="optionC" placeholder="Option C" />
-              </div>
-              <div style="flex:1;">
-                <label for="optionD">D</label>
-                <input type="text" id="optionD" placeholder="Option D" />
-              </div>
+            <div>
+              <div class="logo-text">PWians</div>
+              <div class="logo-subtitle">Admin Portal</div>
             </div>
-            <label for="correctAnswer">Answer</label>
-            <select id="correctAnswer"><option value="">--Select--</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
-          </div>
-          <div id="integer-section" style="display:none;">
-            <label for="integerAnswer">Answer</label>
-            <input type="number" id="integerAnswer" placeholder="Enter answer" />
-          </div>
-          <label for="solution">Solution</label>
-          <input type="text" id="solution" placeholder="Enter solution" />
-          <label for="solutionImageURL">Solution Image URL</label>
-          <input type="text" id="solutionImageURL" placeholder="Paste solution URL" />
-          <div style="text-align:center;">
-            <button type="button" id="previewBtn">Preview</button>
-            <button type="reset">Clear</button>
-            <button type="submit">Add Q</button>
-          </div>
-        </form>
-        <div id="previewModal" class="modal">
-          <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Preview</h2>
-            <div id="previewContent"></div>
-          </div>
+          </a>
         </div>
-      </section>
+        
+        <nav class="nav-menu">
+          <div class="nav-section">
+            <div class="nav-section-title">Test Management</div>
+            <a href="#" class="nav-item active" data-tab="test-setup">
+              <i class="fas fa-plus-circle nav-icon"></i>
+              <span>Create Test</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="add-question">
+              <i class="fas fa-question-circle nav-icon"></i>
+              <span>Add Questions</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="test-preview">
+              <i class="fas fa-eye nav-icon"></i>
+              <span>Manage Tests</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="chapters">
+              <i class="fas fa-book nav-icon"></i>
+              <span>Chapters</span>
+            </a>
+          </div>
+        </nav>
+      </div>
+    </aside>
 
-      <section id="test-preview-section" class="card" style="display:none;">
-        <h2>Preview</h2>
-        <div id="testPreviewContainer"></div>
-      </section>
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+      <div class="mobile-nav-container">
+        <a href="#" class="mobile-nav-item active" data-tab="test-setup">
+          <i class="fas fa-plus-circle"></i>
+          <span>Create</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-tab="add-question">
+          <i class="fas fa-question-circle"></i>
+          <span>Questions</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-tab="test-preview">
+          <i class="fas fa-eye"></i>
+          <span>Manage</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-tab="chapters">
+          <i class="fas fa-book"></i>
+          <span>Chapters</span>
+        </a>
+      </div>
+    </nav>
 
-      <section id="chapters-section" class="card" style="display:none;">
-        <h2>Subject Chapters</h2>
-        <form id="chapter-form">
-          <label for="chapterBatch">Batch</label>
-          <select id="chapterBatch" required><option value="">--Select Batch--</option></select>
-          <label for="chapterSeries">Series</label>
-          <select id="chapterSeries" required><option value="">--Select Series--</option></select>
-          <label for="chapterSubject">Subject</label>
-          <select id="chapterSubject" required><option value="">--Select Subject--</option></select>
-          <label for="chapterName">Chapter Name</label>
-          <input type="text" id="chapterName" placeholder="e.g. Kinematics" required />
-          <button type="submit">Add Chapter</button>
-        </form>
-        <h3 style="margin-top:20px;">Existing Chapters</h3>
-        <ul id="chaptersList"></ul>
-      </section>
-    </div>
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <!-- Test Setup Section -->
+        <section id="test-setup-section" class="section">
+          <div class="page-header">
+            <h1 class="page-title">Create New Test</h1>
+            <p class="page-subtitle">Set up a new test series for your students</p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fas fa-cogs"></i>
+                Test Configuration
+              </h2>
+            </div>
+            <div class="card-body">
+              <form id="test-setup-form">
+                <div class="form-grid">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label" for="testName">
+                        <i class="fas fa-file-alt"></i>
+                        Test Name
+                      </label>
+                      <input type="text" id="testName" class="form-input" placeholder="Enter test name" required />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="batchSelect">
+                        <i class="fas fa-users"></i>
+                        Select Batch
+                      </label>
+                      <select id="batchSelect" class="form-select" required>
+                        <option value="">Choose a batch</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label" for="testDuration">
+                        <i class="fas fa-clock"></i>
+                        Duration (minutes)
+                      </label>
+                      <input type="number" id="testDuration" class="form-input" placeholder="90" min="1" max="300" required />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="scheduledDate">
+                        <i class="fas fa-calendar-alt"></i>
+                        Scheduled Date & Time
+                      </label>
+                      <input type="datetime-local" id="scheduledDate" class="form-input" required />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="subjects">
+                      <i class="fas fa-book-open"></i>
+                      Subjects (comma-separated)
+                    </label>
+                    <input type="text" id="subjects" class="form-input" placeholder="Physics, Chemistry, Mathematics" required />
+                  </div>
+                </div>
+                <div class="btn-group" style="margin-top: 32px;">
+                  <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-plus"></i>
+                    Create Test Series
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Add Question Section -->
+        <section id="add-question-section" class="section hidden">
+          <div class="page-header">
+            <h1 class="page-title">Add Questions</h1>
+            <p class="page-subtitle">Add questions to your test series</p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fas fa-question-circle"></i>
+                Question Builder
+              </h2>
+            </div>
+            <div class="card-body">
+              <form id="question-form">
+                <div class="form-grid">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label" for="questionBatch">
+                        <i class="fas fa-users"></i>
+                        Batch
+                      </label>
+                      <select id="questionBatch" class="form-select" required>
+                        <option value="">Choose a batch</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="testSeries">
+                        <i class="fas fa-list-alt"></i>
+                        Test Series
+                      </label>
+                      <select id="testSeries" class="form-select" required>
+                        <option value="">Choose a test series</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="subject">
+                        <i class="fas fa-book"></i>
+                        Subject
+                      </label>
+                      <select id="subject" class="form-select" required>
+                        <option value="">Choose a subject</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="question">
+                      <i class="fas fa-edit"></i>
+                      Question Text
+                    </label>
+                    <textarea id="question" class="form-textarea" placeholder="Enter your question here..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="questionType">
+                      <i class="fas fa-list"></i>
+                      Question Type
+                    </label>
+                    <select id="questionType" class="form-select" required>
+                      <option value="">Choose question type</option>
+                      <option value="MCQ">Multiple Choice (MCQ)</option>
+                      <option value="Integer">Integer Answer</option>
+                    </select>
+                  </div>
+
+                  <!-- MCQ Section -->
+                  <div id="mcq-section" class="question-section" style="display: none;">
+                    <h3 class="question-title">
+                      <i class="fas fa-list-ol"></i>
+                      Multiple Choice Options
+                    </h3>
+                    <div class="options-grid">
+                      <div class="form-group">
+                        <label class="form-label" for="optionA">Option A</label>
+                        <input type="text" id="optionA" class="form-input" placeholder="Enter option A" />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label" for="optionB">Option B</label>
+                        <input type="text" id="optionB" class="form-input" placeholder="Enter option B" />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label" for="optionC">Option C</label>
+                        <input type="text" id="optionC" class="form-input" placeholder="Enter option C" />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label" for="optionD">Option D</label>
+                        <input type="text" id="optionD" class="form-input" placeholder="Enter option D" />
+                      </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 24px;">
+                      <label class="form-label" for="correctAnswer">
+                        <i class="fas fa-check-circle"></i>
+                        Correct Answer
+                      </label>
+                      <select id="correctAnswer" class="form-select">
+                        <option value="">Select correct answer</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Integer Section -->
+                  <div id="integer-section" class="question-section" style="display: none;">
+                    <h3 class="question-title">
+                      <i class="fas fa-calculator"></i>
+                      Integer Answer
+                    </h3>
+                    <div class="form-group">
+                      <label class="form-label" for="integerAnswer">
+                        <i class="fas fa-hashtag"></i>
+                        Correct Answer
+                      </label>
+                      <input type="number" id="integerAnswer" class="form-input" placeholder="Enter the correct integer answer" />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="solution">
+                      <i class="fas fa-lightbulb"></i>
+                      Solution Explanation
+                    </label>
+                    <textarea id="solution" class="form-textarea" placeholder="Explain the solution step by step..."></textarea>
+                  </div>
+                </div>
+
+                <div class="btn-group" style="margin-top: 32px;">
+                  <button type="button" id="previewBtn" class="btn btn-secondary">
+                    <i class="fas fa-eye"></i>
+                    Preview Question
+                  </button>
+                  <button type="reset" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i>
+                    Clear Form
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Add Question
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Test Preview Section -->
+        <section id="test-preview-section" class="section hidden">
+          <div class="page-header">
+            <h1 class="page-title">Manage Tests</h1>
+            <p class="page-subtitle">View and manage your test series</p>
+          </div>
+
+          <div id="testPreviewContainer"></div>
+        </section>
+
+        <!-- Chapters Section -->
+        <section id="chapters-section" class="section hidden">
+          <div class="page-header">
+            <h1 class="page-title">Subject Chapters</h1>
+            <p class="page-subtitle">Organize chapters for different subjects</p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fas fa-plus"></i>
+                Add New Chapter
+              </h2>
+            </div>
+            <div class="card-body">
+              <form id="chapter-form">
+                <div class="form-grid">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label" for="chapterBatch">
+                        <i class="fas fa-users"></i>
+                        Batch
+                      </label>
+                      <select id="chapterBatch" class="form-select" required>
+                        <option value="">Choose a batch</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="chapterSeries">
+                        <i class="fas fa-list-alt"></i>
+                        Test Series
+                      </label>
+                      <select id="chapterSeries" class="form-select" required>
+                        <option value="">Choose a test series</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="chapterSubject">
+                        <i class="fas fa-book"></i>
+                        Subject
+                      </label>
+                      <select id="chapterSubject" class="form-select" required>
+                        <option value="">Choose a subject</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="chapterName">
+                      <i class="fas fa-bookmark"></i>
+                      Chapter Name
+                    </label>
+                    <input type="text" id="chapterName" class="form-input" placeholder="e.g., Kinematics, Organic Chemistry" required />
+                  </div>
+                </div>
+                <div class="btn-group" style="margin-top: 32px;">
+                  <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-plus"></i>
+                    Add Chapter
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fas fa-list"></i>
+                Existing Chapters
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="chapters-list">
+                <ul id="chaptersList">
+                  <li style="text-align: center; color: var(--text-muted); font-style: italic;">
+                    Select a test series and subject to view chapters
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
   </div>
 
+  <!-- FAB -->
+  <button class="fab" id="fab">
+    <i class="fas fa-plus"></i>
+  </button>
+
+  <!-- Modals -->
+  <!-- Batch Modal -->
   <div id="batchModal" class="modal">
     <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Add Batch</h2>
-      <form id="batch-form">
-        <label for="batchName">Batch Name</label>
-        <input type="text" id="batchName" required />
-        <button type="submit">Add Batch</button>
-      </form>
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-plus"></i>
+          Add New Batch
+        </h3>
+        <button class="modal-close" type="button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="batch-form">
+          <div class="form-group">
+            <label class="form-label" for="batchName">
+              <i class="fas fa-users"></i>
+              Batch Name
+            </label>
+            <input type="text" id="batchName" class="form-input" placeholder="e.g., Lakshya JEE 2.0" required />
+          </div>
+          <div class="btn-group" style="margin-top: 24px;">
+            <button type="submit" class="btn btn-primary btn-full">
+              <i class="fas fa-plus"></i>
+              Add Batch
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
+
+  <!-- Preview Modal -->
+  <div id="previewModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-eye"></i>
+          Question Preview
+        </h3>
+        <button class="modal-close" type="button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="previewContent"></div>
+      </div>
+    </div>
+  </div>
+
 <script>
-  // Helper to call our API
-  const api = (path, opts = {}) =>
-    fetch('/api/' + path, {
-      headers: { 'Content-Type': 'application/json' },
-      ...opts
-    }).then(r => r.json());
+  // Theme management
+  const themeToggle = document.getElementById('themeToggle');
+  const body = document.body;
+  
+  function toggleTheme() {
+    const isDark = body.hasAttribute('data-theme');
+    if (isDark) {
+      body.removeAttribute('data-theme');
+      themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      localStorage.setItem('theme', 'light');
+    } else {
+      body.setAttribute('data-theme', 'dark');
+      themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      localStorage.setItem('theme', 'dark');
+    }
+  }
+  
+  // Load saved theme
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    body.setAttribute('data-theme', 'dark');
+    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+  }
+  
+  themeToggle.addEventListener('click', toggleTheme);
+
+  // Toast notifications
+  function showToast(message, type = "info") {
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    
+    const icon = type === "error" ? "fas fa-exclamation-circle" : 
+                 type === "success" ? "fas fa-check-circle" : 
+                 "fas fa-info-circle";
+    
+    toast.innerHTML = `
+      <i class="${icon}"></i>
+      <span>${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 300);
+    }, 3000);
+  }
+
+  // API helper
+  const api = async (path, opts = {}) => {
+    try {
+      const response = await fetch('/api/' + path, {
+        headers: { 'Content-Type': 'application/json' },
+        ...opts
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  };
 
   // Cache for tests by batch
   window._testsCache = [];
 
   // Tab switching
   function switchTab(tab) {
-    document.querySelectorAll('section').forEach(s =>
-      s.style.display = s.id === tab + '-section' ? 'block' : 'none'
-    );
-    document.querySelectorAll('.sidebar nav a, .bottom-nav a').forEach(a =>
-      a.classList.toggle('active', a.dataset.tab === tab)
-    );
-  }
-
-  // 1) Batches → fill Batch selects
-  async function populateBatchSelects() {
-    const batches = await api('batches');
-    ['batchSelect', 'questionBatch', 'chapterBatch'].forEach(id => {
-      const sel = document.getElementById(id);
-      sel.innerHTML = '<option value="">--Select Batch--</option>';
-      batches.forEach(b =>
-        sel.appendChild(new Option(`${b.BatchID} – ${b.name}`, b._id))
-      );
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(section => {
+      section.classList.add('hidden');
     });
+    
+    // Show target section
+    const targetSection = document.getElementById(tab + '-section');
+    targetSection.classList.remove('hidden');
+    
+    // Update active states
+    document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.tab === tab);
+    });
+
+    // Load data based on tab
+    if (tab === 'add-question' || tab === 'chapters') {
+      populateBatchSelects();
+    }
+    if (tab === 'test-preview') {
+      loadTestPreview();
+    }
+    if (tab === 'chapters') {
+      document.getElementById('chaptersList').innerHTML = `
+        <li style="text-align: center; color: var(--text-muted); font-style: italic;">
+          Select a test series and subject to view chapters
+        </li>
+      `;
+    }
   }
 
-  // 2) On Add-Qs: load Test series for a batch, cache them
+  // Populate batch selects
+  async function populateBatchSelects() {
+    try {
+      const batches = await api('batches');
+      ['batchSelect', 'questionBatch', 'chapterBatch'].forEach(id => {
+        const select = document.getElementById(id);
+        const currentValue = select.value;
+        select.innerHTML = `<option value="">${select.options[0].text}</option>`;
+        batches.forEach(batch => {
+          const option = document.createElement('option');
+          option.value = batch._id;
+          option.textContent = `${batch.BatchID} – ${batch.name}`;
+          select.appendChild(option);
+        });
+        if (currentValue) select.value = currentValue;
+      });
+    } catch (error) {
+      console.error('Error loading batches:', error);
+      showToast('Error loading batches', 'error');
+    }
+  }
+
+  // Load test series for batch
   async function loadTestSeriesForBatch(batchId) {
-    const sel = document.getElementById('testSeries');
-    sel.innerHTML = '<option value="">--Select Series--</option>';
+    const select = document.getElementById('testSeries');
+    select.innerHTML = '<option value="">Loading...</option>';
     window._testsCache = [];
 
-    if (!batchId) return;
+    if (!batchId) {
+      select.innerHTML = '<option value="">Choose a test series</option>';
+      return;
+    }
 
-    const all = await api('tests');
-    const filtered = all.filter(t => t.batch._id === batchId);
-    window._testsCache = filtered;
+    try {
+      const allTests = await api('tests');
+      const filteredTests = allTests.filter(test => test.batch._id === batchId);
+      window._testsCache = filteredTests;
 
-    filtered.forEach(t =>
-      sel.appendChild(new Option(`${t.TestID} – ${t.testName}`, t._id))
-    );
+      select.innerHTML = '<option value="">Choose a test series</option>';
+      filteredTests.forEach(test => {
+        const option = document.createElement('option');
+        option.value = test._id;
+        option.textContent = `${test.TestID} – ${test.testName}`;
+        select.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error loading test series:', error);
+      select.innerHTML = '<option value="">Error loading series</option>';
+      showToast('Error loading test series', 'error');
+    }
   }
 
-  // 3) On Series‐change: load subjects from cache
+  // Load subjects from cache
   function loadSubjects(seriesId, targetId) {
-    const sel = document.getElementById(targetId);
-    sel.innerHTML = '<option value="">--Select Subject--</option>';
+    const select = document.getElementById(targetId);
+    select.innerHTML = '<option value="">Choose a subject</option>';
+    
     if (!seriesId) return;
+    
     const test = window._testsCache.find(t => t._id === seriesId);
     if (!test) return;
-    test.subjects.forEach(s =>
-      sel.appendChild(new Option(s, s))
-    );
+    
+    test.subjects.forEach(subject => {
+      const option = document.createElement('option');
+      option.value = subject;
+      option.textContent = subject;
+      select.appendChild(option);
+    });
   }
 
-  // 4) Chapters: similar series‐load
+  // Load chapter series
   async function loadChapterSeries(batchId) {
-    const sel = document.getElementById('chapterSeries');
-    sel.innerHTML = '<option value="">--Select Series--</option>';
-    if (!batchId) return;
-    const all = await api('tests');
-    all.filter(t => t.batch._id === batchId)
-       .forEach(t =>
-         sel.appendChild(new Option(`${t.TestID} – ${t.testName}`, t._id))
-       );
+    const select = document.getElementById('chapterSeries');
+    select.innerHTML = '<option value="">Loading...</option>';
+    
+    if (!batchId) {
+      select.innerHTML = '<option value="">Choose a test series</option>';
+      return;
+    }
+
+    try {
+      const allTests = await api('tests');
+      const filteredTests = allTests.filter(test => test.batch._id === batchId);
+      
+      select.innerHTML = '<option value="">Choose a test series</option>';
+      filteredTests.forEach(test => {
+        const option = document.createElement('option');
+        option.value = test._id;
+        option.textContent = `${test.TestID} – ${test.testName}`;
+        select.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error loading chapter series:', error);
+      select.innerHTML = '<option value="">Error loading series</option>';
+      showToast('Error loading chapter series', 'error');
+    }
   }
 
+  // Load chapters
   async function loadChapters() {
-    const series  = document.getElementById('chapterSeries').value;
+    const series = document.getElementById('chapterSeries').value;
     const subject = document.getElementById('chapterSubject').value;
-    const ul      = document.getElementById('chaptersList');
-    ul.innerHTML = '';
-    if (!series || !subject) return;
-    const res = await api(`chapters/${series}/${subject}`);
-    (res.chapters || []).forEach(ch => {
-      const li = document.createElement('li');
-      li.textContent = ch;
-      ul.appendChild(li);
-    });
-  }
+    const list = document.getElementById('chaptersList');
+    
+    list.innerHTML = '';
+    
+    if (!series || !subject) {
+      list.innerHTML = `
+        <li style="text-align: center; color: var(--text-muted); font-style: italic;">
+          Select a test series and subject to view chapters
+        </li>
+      `;
+      return;
+    }
 
-  // 5) Test‐preview (dashboard)
-  async function loadTestPreview() {
-    const cont = document.getElementById('testPreviewContainer');
-    cont.innerHTML = '';
-    const tests = await api('tests');
-    const now = Date.now();
-    tests.forEach(t => {
-      const card = document.createElement('div');
-      card.className = 'test-card';
-      let status, action;
-      if (t.published) {
-        status = '<p style="color:green;font-weight:600;">Published</p>';
-        action = `<button onclick="deleteTest('${t._id}')">Delete</button>`;
-      } else if (t.scheduledAt && now < new Date(t.scheduledAt).getTime()) {
-        status = '<p style="color:orange;font-weight:600;">Scheduled</p>';
-        action = `<button disabled>Not Live</button>`;
+    try {
+      const response = await api(`chapters/${series}/${subject}`);
+      const chapters = response.chapters || [];
+      
+      if (chapters.length === 0) {
+        list.innerHTML = `
+          <li style="text-align: center; color: var(--text-muted); font-style: italic;">
+            No chapters found for this subject
+          </li>
+        `;
       } else {
-        status = '<p style="color:blue;font-weight:600;">Ready</p>';
-        action = `<button onclick="sendTest('${t._id}')">Send</button>`;
-      }
-      card.innerHTML = `
-        <div>
-          <h3>${t.TestID} – ${t.testName}</h3>
-          <p>Batch: ${t.batch.BatchID} – ${t.batch.name}</p>
-          <p>Duration: ${t.testDuration} min</p>
-          <p>Subjects: ${t.subjects.join(', ')}</p>
-          ${t.scheduledAt ? `<p>Schedule: ${new Date(t.scheduledAt).toLocaleString()}</p>` : ''}
-          ${status}
-        </div>
-        <div class="btn-group">
-          <button onclick="previewTest('${t._id}')">Preview</button>
-          ${action}
-        </div>`;
-      cont.appendChild(card);
-    });
-  }
-
-  // 6) Test actions
-  window.deleteTest = async id => {
-    if (!confirm('Delete test?')) return;
-    await api(`tests/${id}`, { method: 'DELETE' });
-    loadTestPreview();
-  };
-  window.sendTest = async id => {
-    if (!confirm('Send this test?')) return;
-    await api(`tests/${id}/publish`, { method: 'PATCH' });
-    loadTestPreview();
-  };
-  window.previewTest = id => {
-    window.location.href = `/preview.html?test=${id}`;
-  };
-
-  // 7) Question‐Preview modal wiring
-  document.addEventListener('DOMContentLoaded', () => {
-    const previewModal   = document.getElementById('previewModal');
-    const previewBtn     = document.getElementById('previewBtn');
-    const previewContent = document.getElementById('previewContent');
-
-    previewBtn.addEventListener('click', () => {
-      let html = '<p><strong>Question:</strong></p>';
-      const q = document.getElementById('question').value.trim();
-      html += q ? `<p>${q}</p>` : '<p><em>No question provided</em></p>';
-      const tp = document.getElementById('questionType').value;
-      html += `<p><strong>Type:</strong> ${tp}</p>`;
-
-      if (tp === 'MCQ') {
-        html += '<ol type="A">';
-        ['optionA','optionB','optionC','optionD'].forEach(id => {
-          const v = document.getElementById(id).value.trim() || '–';
-          html += `<li>${v}</li>`;
+        chapters.forEach(chapter => {
+          const li = document.createElement('li');
+          li.textContent = chapter;
+          list.appendChild(li);
         });
-        html += '</ol>';
-        const ans = document.getElementById('correctAnswer').value || '–';
-        html += `<p><strong>Answer:</strong> ${ans}</p>`;
-      } else {
-        const ans = document.getElementById('integerAnswer').value.trim() || '–';
-        html += `<p><strong>Answer:</strong> ${ans}</p>`;
+      }
+    } catch (error) {
+      console.error('Error loading chapters:', error);
+      list.innerHTML = `
+        <li style="text-align: center; color: var(--error); font-style: italic;">
+          Error loading chapters
+        </li>
+      `;
+      showToast('Error loading chapters', 'error');
+    }
+  }
+
+  // Load test preview
+  async function loadTestPreview() {
+    const container = document.getElementById('testPreviewContainer');
+    container.innerHTML = `
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading test series...</div>
+      </div>
+    `;
+
+    try {
+      const tests = await api('tests');
+      container.innerHTML = '';
+      
+      if (tests.length === 0) {
+        container.innerHTML = `
+          <div class="card">
+            <div class="card-body" style="text-align: center; padding: 80px 20px;">
+              <i class="fas fa-inbox" style="font-size: 64px; color: var(--text-muted); margin-bottom: 24px; opacity: 0.5;"></i>
+              <h3 style="color: var(--text-secondary); margin-bottom: 16px; font-size: 24px; font-weight: 700;">No Tests Found</h3>
+              <p style="color: var(--text-muted); font-size: 16px;">Create your first test to get started</p>
+            </div>
+          </div>
+        `;
+        return;
       }
 
-      const sol = document.getElementById('solution').value.trim();
-      html += `<p><strong>Solution:</strong></p><p>${sol || '<em>None</em>'}</p>`;
-
-      previewContent.innerHTML = html;
-      previewModal.style.display = 'flex';
-    });
-
-    document.querySelector('#previewModal .close').addEventListener('click', () => {
-      previewModal.style.display = 'none';
-    });
-    window.addEventListener('click', e => {
-      if (e.target === previewModal) previewModal.style.display = 'none';
-    });
-
-    // 8) DOM‐ready event wiring for everything else
-
-    // Tabs & Populate Batches
-    document.querySelectorAll('.sidebar nav a, .bottom-nav a').forEach(a => {
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        switchTab(a.dataset.tab);
-        if (a.dataset.tab === 'add-question') populateBatchSelects();
-        if (a.dataset.tab === 'test-preview') loadTestPreview();
-        if (a.dataset.tab === 'chapters') {
-          populateBatchSelects();
-          document.getElementById('chaptersList').innerHTML = '';
+      const now = Date.now();
+      tests.forEach(test => {
+        const card = document.createElement('div');
+        card.className = 'test-card';
+        
+        let status, statusClass, actionButton;
+        
+        if (test.published) {
+          status = 'Published';
+          statusClass = 'status-published';
+          actionButton = `<button class="btn btn-danger btn-sm" onclick="deleteTest('${test._id}')">
+            <i class="fas fa-trash"></i> Delete
+          </button>`;
+        } else if (test.scheduledAt && now < new Date(test.scheduledAt).getTime()) {
+          status = 'Scheduled';
+          statusClass = 'status-scheduled';
+          actionButton = `<button class="btn btn-secondary btn-sm" disabled>
+            <i class="fas fa-clock"></i> Pending
+          </button>`;
+        } else {
+          status = 'Ready';
+          statusClass = 'status-ready';
+          actionButton = `<button class="btn btn-success btn-sm" onclick="sendTest('${test._id}')">
+            <i class="fas fa-paper-plane"></i> Publish
+          </button>`;
         }
+
+        card.innerHTML = `
+          <div class="test-header">
+            <div>
+              <h3 class="test-title">${test.TestID} – ${test.testName}</h3>
+              <div class="test-details">
+                <div class="test-detail">
+                  <i class="fas fa-users"></i>
+                  <span>Batch: ${test.batch.BatchID} – ${test.batch.name}</span>
+                </div>
+                <div class="test-detail">
+                  <i class="fas fa-clock"></i>
+                  <span>Duration: ${test.testDuration} min</span>
+                </div>
+                <div class="test-detail">
+                  <i class="fas fa-book"></i>
+                  <span>Subjects: ${test.subjects.join(', ')}</span>
+                </div>
+                ${test.scheduledAt ? `
+                  <div class="test-detail">
+                    <i class="fas fa-calendar"></i>
+                    <span>Schedule: ${new Date(test.scheduledAt).toLocaleString()}</span>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+            <div class="test-status ${statusClass}">
+              <i class="fas fa-${test.published ? 'check-circle' : test.scheduledAt && now < new Date(test.scheduledAt).getTime() ? 'clock' : 'play-circle'}"></i>
+              ${status}
+            </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary btn-sm" onclick="previewTest('${test._id}')">
+              <i class="fas fa-eye"></i> Preview
+            </button>
+            ${actionButton}
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    } catch (error) {
+      console.error('Error loading test preview:', error);
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-body" style="text-align: center; padding: 80px 20px;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 64px; color: var(--error); margin-bottom: 24px;"></i>
+            <h3 style="color: var(--error); margin-bottom: 16px; font-size: 24px; font-weight: 700;">Error Loading Tests</h3>
+            <p style="color: var(--text-muted); font-size: 16px;">Please try again later</p>
+          </div>
+        </div>
+      `;
+      showToast('Error loading tests', 'error');
+    }
+  }
+
+  // Test actions
+  window.deleteTest = async (id) => {
+    if (!confirm('Are you sure you want to delete this test? This action cannot be undone.')) return;
+    
+    try {
+      await api(`tests/${id}`, { method: 'DELETE' });
+      showToast('Test deleted successfully', 'success');
+      loadTestPreview();
+    } catch (error) {
+      console.error('Error deleting test:', error);
+      showToast('Error deleting test', 'error');
+    }
+  };
+
+  window.sendTest = async (id) => {
+    if (!confirm('Are you sure you want to publish this test? Students will be able to access it immediately.')) return;
+    
+    try {
+      await api(`tests/${id}/publish`, { method: 'PATCH' });
+      showToast('Test published successfully', 'success');
+      loadTestPreview();
+    } catch (error) {
+      console.error('Error publishing test:', error);
+      showToast('Error publishing test', 'error');
+    }
+  };
+
+  window.previewTest = (id) => {
+    window.open(`/preview.html?test=${id}`, '_blank');
+  };
+
+  // Initialize when DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    // Tab switching
+    document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab(item.dataset.tab);
       });
     });
 
-    // Draggable FAB
-    (function(){
-      const fab = document.getElementById('fab');
-      let dragging=false, ox=0, oy=0;
-      fab.style.position='fixed';
-      fab.style.top=`${window.innerHeight-fab.offsetHeight-20}px`;
-      fab.style.left=`${window.innerWidth-fab.offsetWidth-20}px`;
-      fab.addEventListener('mousedown', e=>{
-        dragging=true; fab.style.cursor='grabbing';
-        const r=fab.getBoundingClientRect();
-        ox=e.clientX-r.left; oy=e.clientY-r.top; e.preventDefault();
-      });
-      document.addEventListener('mousemove', e=>{
-        if(!dragging) return;
-        let x=e.clientX-ox, y=e.clientY-oy;
-        x=Math.max(0,Math.min(window.innerWidth-fab.offsetWidth,x));
-        y=Math.max(0,Math.min(window.innerHeight-fab.offsetHeight,y));
-        fab.style.left=`${x}px`; fab.style.top=`${y}px}`;
-      });
-      document.addEventListener('mouseup',()=>{dragging=false; fab.style.cursor='grab';});
-      fab.addEventListener('click',()=>document.getElementById('batchModal').style.display='flex');
-    })();
+    // FAB functionality
+    const fab = document.getElementById('fab');
+    fab.addEventListener('click', () => {
+      document.getElementById('batchModal').style.display = 'flex';
+    });
 
-    // Batch form
-    document.getElementById('batch-form').addEventListener('submit', async e => {
+    // Modal functionality
+    document.querySelectorAll('.modal-close').forEach(closeBtn => {
+      closeBtn.addEventListener('click', () => {
+        closeBtn.closest('.modal').style.display = 'none';
+      });
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal')) {
+        e.target.style.display = 'none';
+      }
+    });
+
+    // Form submissions
+    document.getElementById('batch-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('batchName').value.trim();
-      if (!name) return alert('Enter batch name');
-      await api('batches', { method:'POST', body: JSON.stringify({ name }) });
-      alert('Batch added!');
-      e.target.reset();
-      document.getElementById('batchModal').style.display='none';
-      populateBatchSelects();
+      
+      if (!name) {
+        showToast('Please enter batch name', 'error');
+        return;
+      }
+
+      try {
+        await api('batches', { 
+          method: 'POST', 
+          body: JSON.stringify({ name }) 
+        });
+        showToast('Batch added successfully!', 'success');
+        e.target.reset();
+        document.getElementById('batchModal').style.display = 'none';
+        populateBatchSelects();
+      } catch (error) {
+        console.error('Error adding batch:', error);
+        showToast('Error adding batch', 'error');
+      }
     });
 
-    // Test‐setup form
-    document.getElementById('test-setup-form').addEventListener('submit', async e => {
+    document.getElementById('test-setup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const testName     = document.getElementById('testName').value.trim();
-      const batch        = document.getElementById('batchSelect').value;
-      const testDuration = +document.getElementById('testDuration').value;
-      const subjects     = document.getElementById('subjects').value.split(',').map(s=>s.trim());
-      const scheduledAt  = document.getElementById('scheduledDate').value;
-      if (!testName||!batch||!testDuration||!subjects.length||!scheduledAt)
-        return alert('All fields are required');
-      await api('tests', {
-        method: 'POST',
-        body: JSON.stringify({ testName, batch, testDuration, subjects, scheduledAt })
-      });
-      alert('Test created!');
-      e.target.reset();
+      
+      const testName = document.getElementById('testName').value.trim();
+      const batch = document.getElementById('batchSelect').value;
+      const testDuration = parseInt(document.getElementById('testDuration').value);
+      const subjects = document.getElementById('subjects').value.split(',').map(s => s.trim()).filter(s => s);
+      const scheduledAt = document.getElementById('scheduledDate').value;
+
+      if (!testName || !batch || !testDuration || !subjects.length || !scheduledAt) {
+        showToast('All fields are required', 'error');
+        return;
+      }
+
+      if (testDuration < 1 || testDuration > 300) {
+        showToast('Duration must be between 1 and 300 minutes', 'error');
+        return;
+      }
+
+      try {
+        await api('tests', {
+          method: 'POST',
+          body: JSON.stringify({ testName, batch, testDuration, subjects, scheduledAt })
+        });
+        showToast('Test created successfully!', 'success');
+        e.target.reset();
+      } catch (error) {
+        console.error('Error creating test:', error);
+        showToast('Error creating test', 'error');
+      }
     });
 
-    // Cascades for Add-Qs
-    document.getElementById('questionBatch')
-      .addEventListener('change', e => {
-        loadTestSeriesForBatch(e.target.value);
-        document.getElementById('subject').innerHTML = '<option value="">--Select Subject--</option>';
-      });
-    document.getElementById('testSeries')
-      .addEventListener('change', e => loadSubjects(e.target.value, 'subject'));
-
-    // Question form
-    document.getElementById('questionType').addEventListener('change', e => {
-      document.getElementById('mcq-section').style.display = e.target.value==='MCQ'?'block':'none';
-      document.getElementById('integer-section').style.display = e.target.value==='Integer'?'block':'none';
+    // Question form cascades
+    document.getElementById('questionBatch').addEventListener('change', (e) => {
+      loadTestSeriesForBatch(e.target.value);
+      document.getElementById('subject').innerHTML = '<option value="">Choose a subject</option>';
     });
-    document.getElementById('question-form').addEventListener('submit', async e => {
+
+    document.getElementById('testSeries').addEventListener('change', (e) => {
+      loadSubjects(e.target.value, 'subject');
+    });
+
+    // Question type toggle
+    document.getElementById('questionType').addEventListener('change', (e) => {
+      const mcqSection = document.getElementById('mcq-section');
+      const integerSection = document.getElementById('integer-section');
+      
+      mcqSection.style.display = e.target.value === 'MCQ' ? 'block' : 'none';
+      integerSection.style.display = e.target.value === 'Integer' ? 'block' : 'none';
+    });
+
+    // Question form submission
+    document.getElementById('question-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const batch  = document.getElementById('questionBatch').value;
+      
+      const batch = document.getElementById('questionBatch').value;
       const series = document.getElementById('testSeries').value;
-      const subj   = document.getElementById('subject').value;
-      if (!batch||!series||!subj) return alert('Select batch, series & subject!');
+      const subject = document.getElementById('subject').value;
+      
+      if (!batch || !series || !subject) {
+        showToast('Please select batch, series & subject!', 'error');
+        return;
+      }
+
       const data = {
         test: series,
-        subject: subj,
+        subject: subject,
         question: document.getElementById('question').value.trim(),
         questionType: document.getElementById('questionType').value,
         solution: document.getElementById('solution').value.trim()
       };
-      if (data.questionType==='MCQ') {
-        data.options = ['optionA','optionB','optionC','optionD'].map(id=>document.getElementById(id).value.trim());
+
+      if (!data.question) {
+        showToast('Please enter the question text!', 'error');
+        return;
+      }
+
+      if (data.questionType === 'MCQ') {
+        data.options = ['optionA', 'optionB', 'optionC', 'optionD'].map(id => 
+          document.getElementById(id).value.trim()
+        );
         data.correctAnswer = document.getElementById('correctAnswer').value;
-        if (!data.correctAnswer) return alert('Pick the correct answer!');
+        
+        if (data.options.some(option => !option)) {
+          showToast('Please fill all MCQ options!', 'error');
+          return;
+        }
+        
+        if (!data.correctAnswer) {
+          showToast('Please select the correct answer!', 'error');
+          return;
+        }
       } else {
         data.correctAnswer = document.getElementById('integerAnswer').value.trim();
-        if (!data.correctAnswer) return alert('Enter the integer answer!');
+        
+        if (!data.correctAnswer) {
+          showToast('Please enter the integer answer!', 'error');
+          return;
+        }
       }
-      await api('questions', { method:'POST', body: JSON.stringify(data) });
-      alert('Question added!');
-      // Clear form
-      ['question','solution'].forEach(id=>document.getElementById(id).value='');
-      ['optionA','optionB','optionC','optionD','correctAnswer','integerAnswer']
-        .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+
+      try {
+        await api('questions', { 
+          method: 'POST', 
+          body: JSON.stringify(data) 
+        });
+        showToast('Question added successfully!', 'success');
+        
+        // Clear form
+        ['question', 'solution'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        ['optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer', 'integerAnswer'].forEach(id => {
+          const element = document.getElementById(id);
+          if (element) element.value = '';
+        });
+      } catch (error) {
+        console.error('Error adding question:', error);
+        showToast('Error adding question', 'error');
+      }
     });
 
-    // Chapters
-    document.getElementById('chapterBatch').addEventListener('change', e => {
-      loadChapterSeries(e.target.value);
-      document.getElementById('chapterSubject').innerHTML = '<option value="">--Select Subject--</option>';
+    // Preview functionality
+    document.getElementById('previewBtn').addEventListener('click', () => {
+      const previewContent = document.getElementById('previewContent');
+      
+      let html = '<div style="padding: 24px; line-height: 1.6;">';
+      
+      const question = document.getElementById('question').value.trim();
+      html += '<h4 style="color: var(--primary); margin-bottom: 20px; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px;"><i class="fas fa-question-circle"></i>Question:</h4>';
+      html += question ? `<div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-lg); margin-bottom: 24px; border-left: 4px solid var(--primary); line-height: 1.6;">${question}</div>` : '<p style="color: var(--text-muted); font-style: italic; margin-bottom: 24px;">No question provided</p>';
+      
+      const questionType = document.getElementById('questionType').value;
+      html += `<h4 style="color: var(--primary); margin-bottom: 16px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px;"><i class="fas fa-list"></i>Type: ${questionType}</h4>`;
+
+      if (questionType === 'MCQ') {
+        html += '<div style="background: var(--bg-tertiary); padding: 24px; border-radius: var(--radius-lg); margin-bottom: 24px;">';
+        html += '<ol type="A" style="margin: 0; padding-left: 24px;">';
+        ['optionA', 'optionB', 'optionC', 'optionD'].forEach(id => {
+          const value = document.getElementById(id).value.trim() || '–';
+          html += `<li style="margin-bottom: 12px; padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border); font-weight: 500;">${value}</li>`;
+        });
+        html += '</ol></div>';
+        
+        const answer = document.getElementById('correctAnswer').value || '–';
+        html += `<h4 style="color: var(--success); margin-bottom: 24px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px;"><i class="fas fa-check-circle"></i>Correct Answer: Option ${answer}</h4>`;
+      } else {
+        const answer = document.getElementById('integerAnswer').value.trim() || '–';
+        html += `<h4 style="color: var(--success); margin-bottom: 24px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px;"><i class="fas fa-hashtag"></i>Correct Answer: ${answer}</h4>`;
+      }
+
+      const solution = document.getElementById('solution').value.trim();
+      html += '<h4 style="color: var(--primary); margin-bottom: 16px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px;"><i class="fas fa-lightbulb"></i>Solution:</h4>';
+      html += solution ? `<div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-lg); border-left: 4px solid var(--secondary); line-height: 1.6;">${solution}</div>` : '<p style="color: var(--text-muted); font-style: italic;">No solution provided</p>';
+      
+      html += '</div>';
+
+      previewContent.innerHTML = html;
+      document.getElementById('previewModal').style.display = 'flex';
     });
-    document.getElementById('chapterSeries').addEventListener('change', e => loadSubjects(e.target.value, 'chapterSubject'));
+
+    // Chapter form cascades
+    document.getElementById('chapterBatch').addEventListener('change', (e) => {
+      loadChapterSeries(e.target.value);
+      document.getElementById('chapterSubject').innerHTML = '<option value="">Choose a subject</option>';
+    });
+
+    document.getElementById('chapterSeries').addEventListener('change', (e) => {
+      loadSubjects(e.target.value, 'chapterSubject');
+    });
+
     document.getElementById('chapterSubject').addEventListener('change', loadChapters);
-    document.getElementById('chapter-form').addEventListener('submit', async e => {
+
+    // Chapter form submission
+    document.getElementById('chapter-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
       const body = {
         test: document.getElementById('chapterSeries').value,
         subject: document.getElementById('chapterSubject').value,
         name: document.getElementById('chapterName').value.trim()
       };
-      if (!body.test||!body.subject||!body.name) return alert('All fields required');
-      await api('chapters', { method:'POST', body: JSON.stringify(body) });
-      alert(`Chapter "${body.name}" added`);
-      document.getElementById('chapterName').value='';
-      loadChapters();
+
+      if (!body.test || !body.subject || !body.name) {
+        showToast('All fields are required', 'error');
+        return;
+      }
+
+      try {
+        await api('chapters', { 
+          method: 'POST', 
+          body: JSON.stringify(body) 
+        });
+        showToast(`Chapter "${body.name}" added successfully`, 'success');
+        document.getElementById('chapterName').value = '';
+        loadChapters();
+      } catch (error) {
+        console.error('Error adding chapter:', error);
+        showToast('Error adding chapter', 'error');
+      }
     });
 
-    // Kick it off
+    // Initialize
     populateBatchSelects();
     switchTab('test-setup');
   });
 </script>
-
-
 </body>
 </html>
