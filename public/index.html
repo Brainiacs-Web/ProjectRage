@@ -134,20 +134,22 @@
     .header .container {
       max-width: 960px;
       margin: 0 auto;
-      padding: var(--space-sm) var(--space-xl);
+      padding: var(--space-sm) var(--space-md);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: var(--space-sm);
     }
 
     .header .logo {
-      font-size: var(--fs-xl);
+      font-size: clamp(1.25rem, 4vw, var(--fs-xl));
       font-weight: var(--fw-bold);
       color: var(--clr-primary);
       letter-spacing: 1px;
       cursor: pointer;
       transition: all var(--trans-smooth);
       position: relative;
+      flex-shrink: 0;
     }
 
     .header .logo::after {
@@ -173,12 +175,13 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: var(--space-md);
+      gap: var(--space-xs);
+      flex-shrink: 0;
     }
 
     .theme-toggle {
-      width: 40px;
-      height: 40px;
+      width: clamp(32px, 8vw, 40px);
+      height: clamp(32px, 8vw, 40px);
       border-radius: var(--radius-round);
       background: var(--clr-surface);
       border: 2px solid var(--clr-border);
@@ -218,7 +221,7 @@
     }
 
     .theme-toggle .material-icons {
-      font-size: 20px;
+      font-size: clamp(16px, 4vw, 20px);
       transition: transform var(--trans-smooth);
       position: relative;
       z-index: 1;
@@ -233,14 +236,15 @@
       align-items: center;
       background-color: var(--clr-accent);
       color: var(--clr-surface);
-      font-size: var(--fs-base);
+      font-size: clamp(0.75rem, 3vw, var(--fs-base));
       font-weight: var(--fw-semibold);
-      padding: var(--space-sm) var(--space-lg);
+      padding: var(--space-xs) var(--space-sm);
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-light);
       transition: all var(--trans-smooth);
       position: relative;
       overflow: hidden;
+      white-space: nowrap;
     }
 
     .unlock-btn::before {
@@ -269,8 +273,8 @@
     }
 
     .unlock-btn .material-icons {
-      font-size: 20px;
-      margin-right: var(--space-xs);
+      font-size: clamp(16px, 4vw, 20px);
+      margin-right: var(--space-xxs);
       transition: transform var(--trans-smooth);
     }
 
@@ -282,17 +286,19 @@
       flex: 1;
       max-width: 960px;
       margin: 0 auto;
-      padding: var(--space-xxl) var(--space-md);
+      padding: var(--space-lg) var(--space-md);
+      width: 100%;
     }
 
     .select-exam {
-      margin-bottom: var(--space-xxl);
+      margin-bottom: var(--space-xl);
     }
 
     .select-exam h2 {
       opacity: 0;
       transform: translateY(30px);
       animation: titleSlide 0.8s ease-out 0.4s forwards;
+      font-size: clamp(1.5rem, 5vw, var(--fs-xl));
     }
 
     @keyframes titleSlide {
@@ -311,6 +317,7 @@
       opacity: 0;
       transform: translateY(20px);
       animation: controlsSlide 0.6s ease-out 0.6s forwards;
+      gap: var(--space-md);
     }
 
     @keyframes controlsSlide {
@@ -322,21 +329,25 @@
 
     .tabs {
       display: flex;
-      gap: var(--space-md);
+      gap: var(--space-xs);
       flex-wrap: wrap;
+      flex: 1;
     }
 
     .tabs button {
       background-color: var(--clr-surface);
       color: var(--clr-text-secondary);
-      font-size: var(--fs-base);
+      font-size: clamp(0.75rem, 3vw, var(--fs-base));
       font-weight: var(--fw-semibold);
-      padding: var(--space-sm) var(--space-xl);
+      padding: var(--space-xs) var(--space-sm);
       border: 2px solid var(--clr-border);
       border-radius: var(--radius-md);
       transition: all var(--trans-smooth);
       position: relative;
       overflow: hidden;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
     }
 
     .tabs button::before {
@@ -374,15 +385,14 @@
     .lock-desktop {
       display: flex;
       align-items: center;
-      margin-left: var(--space-lg);
     }
 
     .lock-desktop .icon-btn {
       background-color: var(--clr-surface);
       border: 2px solid var(--clr-border);
       border-radius: var(--radius-md);
-      width: 64px;
-      height: 64px;
+      width: clamp(48px, 12vw, 64px);
+      height: clamp(48px, 12vw, 64px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -429,7 +439,7 @@
     }
 
     .lock-desktop .icon-btn .material-icons {
-      font-size: 32px;
+      font-size: clamp(24px, 6vw, 32px);
       color: var(--clr-text-secondary);
       transition: all var(--trans-smooth);
       position: relative;
@@ -443,8 +453,8 @@
 
     .flash-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: var(--space-lg);
+      grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+      gap: var(--space-md);
       margin-bottom: var(--space-xxl);
     }
 
@@ -453,9 +463,9 @@
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-light);
       backdrop-filter: blur(8px);
-      padding: var(--space-lg) var(--space-sm);
+      padding: var(--space-md);
       text-align: center;
-      font-size: var(--fs-lg);
+      font-size: clamp(0.875rem, 4vw, var(--fs-lg));
       font-weight: var(--fw-semibold);
       color: var(--clr-text);
       cursor: pointer;
@@ -468,6 +478,10 @@
                   background-color var(--trans-smooth);
       animation: fadeInUp 0.4s var(--ease-std) forwards;
       border: 1px solid var(--clr-border);
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .flash-card::before {
@@ -509,6 +523,117 @@
       }
     }
 
+    /* Popup Modal Styles */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 300;
+      transition: all 0.3s ease;
+      padding: var(--space-md);
+    }
+
+    body.dark-mode .popup-overlay {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .popup-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .popup-modal {
+      background: var(--clr-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-heavy);
+      padding: var(--space-xl);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      transform: scale(0.8) translateY(20px);
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      border: 1px solid var(--clr-border);
+    }
+
+    .popup-overlay.visible .popup-modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .popup-modal .popup-icon {
+      font-size: 3rem;
+      color: var(--clr-accent);
+      margin-bottom: var(--space-md);
+      animation: iconBounce 2s ease-in-out infinite;
+    }
+
+    @keyframes iconBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .popup-modal h3 {
+      font-size: var(--fs-lg);
+      font-weight: var(--fw-bold);
+      color: var(--clr-text);
+      margin-bottom: var(--space-sm);
+    }
+
+    .popup-modal p {
+      color: var(--clr-text-secondary);
+      margin-bottom: var(--space-xl);
+      line-height: 1.6;
+    }
+
+    .popup-buttons {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .popup-btn {
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: var(--radius-md);
+      font-weight: var(--fw-semibold);
+      transition: all var(--trans-smooth);
+      min-width: 100px;
+      flex: 1;
+    }
+
+    .popup-btn.primary {
+      background-color: var(--clr-accent);
+      color: var(--clr-surface);
+      border: 2px solid var(--clr-accent);
+    }
+
+    .popup-btn.primary:hover {
+      background-color: var(--clr-primary);
+      border-color: var(--clr-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .popup-btn.secondary {
+      background-color: transparent;
+      color: var(--clr-text-secondary);
+      border: 2px solid var(--clr-border);
+    }
+
+    .popup-btn.secondary:hover {
+      background-color: var(--clr-bg);
+      border-color: var(--clr-accent);
+      color: var(--clr-accent);
+    }
+
     #overlay {
       position: fixed;
       top: 0; left: 0;
@@ -541,7 +666,7 @@
     }
 
     #overlayText {
-      font-size: 2.5rem;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
       font-weight: var(--fw-bold);
       color: var(--clr-primary);
       opacity: 0;
@@ -594,7 +719,9 @@
       pointer-events: none;
       transition: all var(--trans-bounce);
       z-index: 150;
-      min-width: 300px;
+      min-width: min(300px, 90vw);
+      max-width: 90vw;
+      text-align: center;
     }
 
     #toast.visible {
@@ -605,6 +732,7 @@
 
     #toast .material-icons {
       animation: iconPulse 2s ease-in-out infinite;
+      flex-shrink: 0;
     }
 
     @keyframes iconPulse {
@@ -635,41 +763,100 @@
       outline-offset: 2px;
     }
 
+    /* Enhanced Mobile Responsiveness */
     @media (max-width: 768px) {
       .header .container {
-        padding: var(--space-sm) var(--space-md);
+        padding: var(--space-sm);
       }
       
       .header-actions {
+        gap: var(--space-xxs);
+      }
+      
+      .unlock-btn {
+        padding: var(--space-xxs) var(--space-xs);
+        font-size: 0.75rem;
+      }
+      
+      .unlock-btn .material-icons {
+        font-size: 16px;
+        margin-right: 2px;
+      }
+      
+      .main {
+        padding: var(--space-md) var(--space-sm);
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
         gap: var(--space-sm);
-      }
-      
-      .theme-toggle {
-        width: 36px;
-        height: 36px;
-      }
-      
-      .theme-toggle .material-icons {
-        font-size: 18px;
       }
       
       .tabs {
+        order: 1;
+        gap: var(--space-xxs);
+      }
+      
+      .tabs button {
+        padding: var(--space-xs);
+        font-size: 0.75rem;
+        min-width: 0;
+      }
+      
+      .lock-desktop {
+        order: 2;
+        justify-content: center;
+        margin-top: var(--space-sm);
+      }
+      
+      .lock-desktop .icon-btn {
+        width: 56px;
+        height: 56px;
+      }
+      
+      .flash-container {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: var(--space-sm);
       }
-      .tabs button {
-        font-size: var(--fs-sm);
-        padding: var(--space-xs) var(--space-md);
-      }
-      .lock-desktop {
-        display: none;
-      }
-      .flash-container {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: var(--space-md);
-      }
+      
       .flash-card {
-        padding: var(--space-md) var(--space-xs);
-        font-size: var(--fs-sm);
+        padding: var(--space-sm);
+        font-size: 0.875rem;
+        min-height: 70px;
+      }
+      
+      .popup-modal {
+        padding: var(--space-lg);
+        margin: var(--space-sm);
+      }
+      
+      .popup-buttons {
+        flex-direction: column;
+      }
+      
+      .popup-btn {
+        min-width: auto;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header .logo {
+        font-size: 1.25rem;
+      }
+      
+      .tabs button {
+        font-size: 0.7rem;
+        padding: 6px;
+      }
+      
+      .flash-container {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      }
+      
+      .flash-card {
+        font-size: 0.8rem;
+        min-height: 60px;
       }
     }
 
@@ -700,13 +887,26 @@
     </div>
   </header>
 
+  <!-- Popup Modal -->
+  <div id="popupOverlay" class="popup-overlay">
+    <div class="popup-modal">
+      <div class="popup-icon material-icons">lock</div>
+      <h3>Access Key Required</h3>
+      <p>Please generate your access key first to unlock all exam features and tests.</p>
+      <div class="popup-buttons">
+        <button id="generateKeyBtn" class="popup-btn primary">Generate Key</button>
+        <button id="cancelBtn" class="popup-btn secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div id="overlay" aria-hidden="true">
     <span id="overlayText">Unlocking…</span>
   </div>
 
   <main class="main">
     <section class="select-exam" aria-labelledby="selectExamHeading">
-      <h2 id="selectExamHeading" style="font-size: var(--fs-xl); font-weight: var(--fw-bold); text-align:center; margin-bottom: var(--space-lg);">
+      <h2 id="selectExamHeading" style="font-size: clamp(1.5rem, 5vw, var(--fs-xl)); font-weight: var(--fw-bold); text-align:center; margin-bottom: var(--space-lg);">
         Select Your Exam
       </h2>
       <div class="controls">
@@ -773,11 +973,12 @@
     // Initialize on page load
     initializeDarkMode();
 
-    // Existing code
-    const EXP_MS = 12 * 60 * 60 * 1000;
+    // Key management - 24 hour expiration
+    const EXP_MS = 24 * 60 * 60 * 1000; // 24 hours
     const rawTs = localStorage.getItem("keyTimestamp");
     const storedTs = rawTs ? parseInt(rawTs, 10) : null;
 
+    // Check if key has expired
     if (storedTs !== null && Date.now() - storedTs > EXP_MS) {
       localStorage.removeItem("keyID");
       localStorage.removeItem("keyTimestamp");
@@ -787,6 +988,9 @@
     const toastText = document.getElementById("toastText");
     const overlay = document.getElementById("overlay");
     const overlayText = document.getElementById("overlayText");
+    const popupOverlay = document.getElementById("popupOverlay");
+    const generateKeyBtn = document.getElementById("generateKeyBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
 
     function showToast(message) {
       toastText.textContent = message;
@@ -796,10 +1000,56 @@
       }, 5000);
     }
 
+    function showPopup() {
+      popupOverlay.classList.add("visible");
+    }
+
+    function hidePopup() {
+      popupOverlay.classList.remove("visible");
+    }
+
+    // Popup event listeners
+    generateKeyBtn.addEventListener('click', () => {
+      hidePopup();
+      overlay.classList.add("overlay-anim");
+      overlayText.textContent = "Redirecting to generate key...";
+      overlay.addEventListener(
+        "animationend",
+        () => {
+          overlay.classList.remove("overlay-anim");
+          window.location.href = "https://linkcents.com/51CgoO";
+        },
+        { once: true }
+      );
+    });
+
+    cancelBtn.addEventListener('click', hidePopup);
+
+    // Close popup when clicking outside
+    popupOverlay.addEventListener('click', (e) => {
+      if (e.target === popupOverlay) {
+        hidePopup();
+      }
+    });
+
+    // Check for returning user with key
     window.addEventListener("load", () => {
       overlay.classList.remove("overlay-anim");
       const keyID = localStorage.getItem("keyID");
-      if (keyID && storedTs !== null) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromRedirect = urlParams.get('from') === 'redirect';
+      
+      // If user is returning from the redirect URL, generate a 24-hour key
+      if (fromRedirect && !keyID) {
+        const newKeyID = 'key_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem("keyID", newKeyID);
+        localStorage.setItem("keyTimestamp", Date.now().toString());
+        showToast("24-hour access key generated successfully!");
+        updateUnlockButtonText();
+        updateLockIcons();
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (keyID && storedTs !== null) {
         const remaining = Math.max(EXP_MS - (Date.now() - storedTs), 0);
         const hrs = Math.floor(remaining / 3600000);
         const mins = Math.floor((remaining % 3600000) / 60000);
@@ -818,13 +1068,13 @@
       unlockHeaderBtn.innerHTML = "";
       let text, iconHtml = "";
       if (isUnlocked) {
-        iconHtml = '<span class="material-icons">lock_open</span>&nbsp;';
+        iconHtml = '<span class="material-icons">lock_open</span>';
         text = w < 768 ? "Unlocked" : "Access Unlocked";
       } else {
-        iconHtml = '<span class="material-icons">lock</span>&nbsp;';
+        iconHtml = '<span class="material-icons">lock</span>';
         text = w < 768 ? "Locked" : "Unlock Access";
       }
-      unlockHeaderBtn.insertAdjacentHTML("beforeend", iconHtml + text);
+      unlockHeaderBtn.innerHTML = iconHtml + (w > 480 ? text : '');
     }
 
     window.addEventListener("resize", updateUnlockButtonText);
@@ -852,12 +1102,12 @@
         { once: true }
       );
       overlay.classList.add("overlay-anim");
-      overlayText.textContent = "Unlocking…";
+      overlayText.textContent = "Redirecting to generate key...";
       overlay.addEventListener(
         "animationend",
         () => {
           overlay.classList.remove("overlay-anim");
-          location.href = "key.html";
+          window.location.href = "https://linkcents.com/51CgoO";
         },
         { once: true }
       );
@@ -902,17 +1152,22 @@
         card.setAttribute("role", "button");
         card.setAttribute("aria-pressed", "false");
         card.addEventListener("click", () => {
-          overlay.classList.add("overlay-anim");
-          overlayText.textContent = item.label;
-          overlay.addEventListener(
-            "animationend",
-            () => {
-              overlay.classList.remove("overlay-anim");
-              const dest = localStorage.getItem("keyID") ? item.url : "visit.html";
-              location.href = dest;
-            },
-            { once: true }
-          );
+          if (localStorage.getItem("keyID")) {
+            // User has valid key, proceed to test
+            overlay.classList.add("overlay-anim");
+            overlayText.textContent = item.label;
+            overlay.addEventListener(
+              "animationend",
+              () => {
+                overlay.classList.remove("overlay-anim");
+                location.href = item.url;
+              },
+              { once: true }
+            );
+          } else {
+            // User doesn't have key, show popup
+            showPopup();
+          }
         });
         card.addEventListener("keydown", e => {
           if (e.key === "Enter" || e.key === " ") {
@@ -938,6 +1193,13 @@
         tabBtn.setAttribute("aria-selected", "true");
         renderCards(category);
       });
+    });
+
+    // Handle escape key to close popup
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && popupOverlay.classList.contains('visible')) {
+        hidePopup();
+      }
     });
   </script>
 </body>
