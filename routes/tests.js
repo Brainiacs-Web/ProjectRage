@@ -12,6 +12,19 @@ router.get('/', async (req, res) => {
   res.json(tests);
 });
 
+// GET test by ID (incl. subjects array for preview)
+router.get('/:id', async (req, res) => {
+  try {
+    const test = await Test.findById(req.params.id).lean();
+    if (!test) return res.status(404).json({ error: 'Test not found' });
+    // test.subjects should be an array of strings
+    res.json(test);
+  } catch (err) {
+    console.error('GET /api/tests/:id error', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // POST create test
 router.post('/', async (req, res) => {
   const { testName, batch, testDuration, subjects, scheduledAt } = req.body;
@@ -37,7 +50,7 @@ router.delete('/:id', async (req, res) => {
   res.json({ success: true });
 });
 
-// POST submit test responses
+// POST submit test responses (unchanged)
 router.post('/:id/submit', async (req, res) => {
   try {
     const testId    = req.params.id;
@@ -57,10 +70,10 @@ router.post('/:id/submit', async (req, res) => {
   }
 });
 
-// GET results for a user
+// GET results for a user (unchanged)
 router.get('/:id/results', async (req, res) => {
   try {
-    const testId    = req.params.id;
+    const testId = req.params.id;
     const { batchName, username } = req.query;
 
     if (!batchName || !username) {
@@ -77,8 +90,9 @@ router.get('/:id/results', async (req, res) => {
     if (!sub) return res.status(404).json({ error: 'Submission not found for this user' });
 
     const results = {};
+    const Question = require('../models/Question');
     for (const subject of test.subjects) {
-      const qs = await require('../models/Question').find({ test: testId, subject }).lean();
+      const qs = await Question.find({ test: testId, subject }).lean();
       results[subject] = qs.map(q => ({
         questionId:     String(q._id),
         question:       q.question,
@@ -96,6 +110,18 @@ router.get('/:id/results', async (req, res) => {
     });
   } catch (err) {
     console.error('GET /api/tests/:id/results error', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/tests/code/:code
+router.get('/code/:code', async (req, res) => {
+  try {
+    const test = await Test.findOne({ code: req.params.code }).lean();
+    if (!test) return res.status(404).json({ error: 'Test not found' });
+    res.json(test);
+  } catch (err) {
+    console.error('GET /api/tests/code/:code error', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
