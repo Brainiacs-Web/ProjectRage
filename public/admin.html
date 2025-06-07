@@ -2059,11 +2059,13 @@ textarea:focus-visible {
       
       const testName = document.getElementById('testName').value.trim();
       const batch = document.getElementById('batchSelect').value;
-      const testDuration = parseInt(document.getElementById('testDuration').value);
+      const testDuration = parseInt(document.getElementById('testDuration').value, 10);
       const subjects = document.getElementById('subjects').value.split(',').map(s => s.trim()).filter(s => s);
-      const scheduledAt = document.getElementById('scheduledDate').value;
+      const scheduledAtRaw = document.getElementById('scheduledDate').value; 
+      // Convert local datetime-local input into an exact ISO string
+      const scheduledAt = new Date(scheduledAtRaw).toISOString();
 
-      if (!testName || !batch || !testDuration || !subjects.length || !scheduledAt) {
+      if (!testName || !batch || !testDuration || !subjects.length || !scheduledAtRaw) {
         showToast('All fields are required', 'error');
         return;
       }
@@ -2260,6 +2262,7 @@ textarea:focus-visible {
     populateBatchSelects();
     switchTab('test-setup');
   });
+
 </script>
 </body>
 </html>
