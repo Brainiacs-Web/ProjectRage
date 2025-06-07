@@ -1979,9 +1979,18 @@ textarea:focus-visible {
     }
   };
 
-  window.previewTest = (id) => {
-    window.open(`/preview.html?test=${id}`, '_blank');
-  };
+ window.previewTest = async (id) => {
+  try {
+    const res = await fetch(`/api/tests/${id}`);
+    if (!res.ok) throw new Error("Failed to fetch test data");
+    const test = await res.json();
+   // pass the actual _id, not the code
+   window.open(`/preview.html?test=${id}`, '_blank');
+  } catch (err) {
+    alert("Could not open preview: " + err.message);
+  }
+};
+
 
   // Initialize when DOM is loaded
   document.addEventListener('DOMContentLoaded', () => {
@@ -2059,13 +2068,11 @@ textarea:focus-visible {
       
       const testName = document.getElementById('testName').value.trim();
       const batch = document.getElementById('batchSelect').value;
-      const testDuration = parseInt(document.getElementById('testDuration').value, 10);
+      const testDuration = parseInt(document.getElementById('testDuration').value);
       const subjects = document.getElementById('subjects').value.split(',').map(s => s.trim()).filter(s => s);
-      const scheduledAtRaw = document.getElementById('scheduledDate').value; 
-      // Convert local datetime-local input into an exact ISO string
-      const scheduledAt = new Date(scheduledAtRaw).toISOString();
+      const scheduledAt = document.getElementById('scheduledDate').value;
 
-      if (!testName || !batch || !testDuration || !subjects.length || !scheduledAtRaw) {
+      if (!testName || !batch || !testDuration || !subjects.length || !scheduledAt) {
         showToast('All fields are required', 'error');
         return;
       }
@@ -2262,7 +2269,6 @@ textarea:focus-visible {
     populateBatchSelects();
     switchTab('test-setup');
   });
-
 </script>
 </body>
 </html>
