@@ -34,13 +34,13 @@ app.use('/api/questions',  questionsRouter);
 app.use('/api/chapters',   chaptersRouter);
 app.use('/api/testSeries', testSeriesRouter);
 
-// Fallback to index.html for SPA (if desired)
+// Fallback to index.html for SPA (optional)
 // app.get('*', (req, res) => {
 //   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 // });
 
-// Start Server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+// Start Server (Bind to 0.0.0.0 for public access)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running at http://0.0.0.0:${PORT}`);
 });
