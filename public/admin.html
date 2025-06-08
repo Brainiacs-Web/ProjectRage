@@ -1552,67 +1552,67 @@ textarea:focus-visible {
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script>
   // ─────────────────────────────────────────────────────────────────────────────
-  // 1. LaTeX Rendering Helper (for preview & inline‐text rendering)
-  //    - Wraps only “bare” LaTeX snippets in \( … \) so MathJax will typeset.
+  // 1. LaTeX Rendering Helper (for preview & form text)
+  //    - Now wraps only the math snippets, leaving plain text intact.
   // ─────────────────────────────────────────────────────────────────────────────
   function renderLatex(str) {
     if (!str) return "";
 
-    // Regex patterns for “bare” LaTeX constructs
+    // Regexes to detect “bare” LaTeX fragments
     const inlinePatterns = [
-      /\\frac\s*{[^}]+}\s*{[^}]+}/g,       // \frac{…}{…}
-      /\\hat\{[^}]+\}/g,                   // \hat{…}
-      /\\[a-zA-Z]+\b/g,                    // any \command like \pi, \varepsilon, \alpha, \beta, etc.
-      /[A-Za-z]+_\{[^}]+\}/g               // subscripts like x_{i}, v_{0}, etc.
+      /\\frac\s*{[^}]+}\s*{[^}]+}/g,   // \frac{…}{…}
+      /\\hat\{[^}]+\}/g,               // \hat{…}
+      /\\pi\b/g,                       // \pi
+      /\\varepsilon\b/g,               // \varepsilon
+      /[A-Za-z]+_\{[^}]+\}/g           // subscripts like x_{i}
     ];
 
-    // If the entire string is already wrapped in a TeX delimiter, return as‐is
-    const hasAnyDelimiter =
-      /\\\(.+?\\\)/.test(str)  ||  // \( … \)
-      /\\\[.+?\\\]/.test(str)  ||  // \[ … \]
-      /\$\$[\s\S]+?\$\$/.test(str) ||  // $$ … $$
-      /\\begin\{.+?\}[\s\S]+?\\end\{.+?\}/.test(str);
+    // If the string is already wrapped in any TeX delimiter, leave as-is
+    const hasAnyDelimiter = 
+         /\\\(.+?\\\)/.test(str)
+      || /\\\[.+?\\\]/.test(str)
+      || /\$\$[\s\S]+?\$\$/.test(str)
+      || /\\begin\{.+?\}[\s\S]+?\\end\{.+?\}/.test(str);
     if (hasAnyDelimiter) {
       return str;
     }
 
-    // Otherwise, wrap each “bare” snippet in \( … \)
+    // Otherwise, find each inline LaTeX snippet and wrap it in \(…\)
     let result = str;
-    inlinePatterns.forEach(pattern => {
-      result = result.replace(pattern, match => `\\(${match}\\)`);
+    inlinePatterns.forEach((pattern) => {
+      result = result.replace(pattern, (match) => `\\(${match}\\)`);
     });
     return result;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 2. Text‐formatting helper: wrap selected text in <sup> or <sub>
+  // 2. Text formatting functionality (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
   function wrapSelectedText(element, tag) {
     const start = element.selectionStart;
     const end = element.selectionEnd;
-    if (start === null || end === null) return;
     const selectedText = element.value.substring(start, end);
-    if (!selectedText) {
+    if (selectedText) {
+      const beforeText = element.value.substring(0, start);
+      const afterText = element.value.substring(end);
+      const wrappedText = `<${tag}>${selectedText}</${tag}>`;
+      element.value = beforeText + wrappedText + afterText;
+      const newPosition = start + wrappedText.length;
+      element.setSelectionRange(newPosition, newPosition);
+      element.focus();
+      showToast(`Text formatted as ${tag}`, 'success');
+    } else {
       showToast('Please select text first', 'info');
-      return;
     }
-    const beforeText = element.value.substring(0, start);
-    const afterText  = element.value.substring(end);
-    const wrappedText = `<${tag}>${selectedText}</${tag}>`;
-    element.value = beforeText + wrappedText + afterText;
-    const newPosition = start + wrappedText.length;
-    element.setSelectionRange(newPosition, newPosition);
-    element.focus();
-    showToast(`Text formatted as ${tag}`, 'success');
   }
 
   function addTextFormattingToElement(element) {
-    if (!element) return;
     element.addEventListener('keydown', function(e) {
       if (e.ctrlKey && e.key.toLowerCase() === 'u') {
         e.preventDefault();
         wrapSelectedText(this, 'sup');
-      } else if (e.ctrlKey && e.key.toLowerCase() === 'd') {
+      }
+      else if (e.ctrlKey && e.key.toLowerCase() === 'd') {
         e.preventDefault();
         wrapSelectedText(this, 'sub');
       }
@@ -1620,13 +1620,11 @@ textarea:focus-visible {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 3. Theme Management
+  // 3. Theme management (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
+  const themeToggle = document.getElementById('themeToggle');
+  const body = document.body;
   function toggleTheme() {
-    const body = document.body;
-    const themeToggle = document.getElementById('themeToggle');
-    if (!body || !themeToggle) return;
-
     const isDark = body.hasAttribute('data-theme');
     if (isDark) {
       body.removeAttribute('data-theme');
@@ -1638,48 +1636,28 @@ textarea:focus-visible {
       localStorage.setItem('theme', 'dark');
     }
   }
-
-  // On initial load, set theme based on localStorage
-  document.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('theme');
-    const body = document.body;
-    const themeToggle = document.getElementById('themeToggle');
-
-    if (savedTheme === 'dark' && body && themeToggle) {
-      body.setAttribute('data-theme', 'dark');
-      themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-    }
-
-    if (themeToggle) {
-      themeToggle.addEventListener('click', toggleTheme);
-    }
-  });
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    body.setAttribute('data-theme', 'dark');
+    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+  }
+  themeToggle.addEventListener('click', toggleTheme);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 4. Toast Notifications
+  // 4. Toast notifications (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
   function showToast(message, type = "info") {
     const toast = document.createElement("div");
     toast.className = `toast toast-${type}`;
-
-    let icon;
-    if (type === "error") {
-      icon = "fas fa-exclamation-circle";
-    } else if (type === "success") {
-      icon = "fas fa-check-circle";
-    } else {
-      icon = "fas fa-info-circle";
-    }
-
+    const icon = type === "error" ? "fas fa-exclamation-circle" : 
+                 type === "success" ? "fas fa-check-circle" : 
+                 "fas fa-info-circle";
     toast.innerHTML = `
       <i class="${icon}"></i>
       <span>${message}</span>
     `;
-
     document.body.appendChild(toast);
-    // Trigger CSS animation
     setTimeout(() => toast.classList.add('show'), 100);
-    // Remove after 3 seconds
     setTimeout(() => {
       toast.classList.remove('show');
       setTimeout(() => {
@@ -1691,9 +1669,9 @@ textarea:focus-visible {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 5. Generic API helper (unchanged)
+  // 5. API helper (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
-  async function api(path, opts = {}) {
+  const api = async (path, opts = {}) => {
     try {
       const response = await fetch('/api/' + path, {
         headers: { 'Content-Type': 'application/json' },
@@ -1708,27 +1686,23 @@ textarea:focus-visible {
       console.error('API Error:', error);
       throw error;
     }
-  }
+  };
 
   // Cache for tests by batch
   window._testsCache = [];
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 6. Tab Switching Logic
+  // 6. Tab switching (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
   function switchTab(tab) {
     document.querySelectorAll('.section').forEach(section => {
       section.classList.add('hidden');
     });
     const targetSection = document.getElementById(tab + '-section');
-    if (targetSection) {
-      targetSection.classList.remove('hidden');
-    }
+    targetSection.classList.remove('hidden');
     document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
       item.classList.toggle('active', item.dataset.tab === tab);
     });
-
-    // When switching to certain tabs, fire pre‐population routines:
     if (tab === 'add-question' || tab === 'chapters') {
       populateBatchSelects();
     }
@@ -1736,34 +1710,31 @@ textarea:focus-visible {
       loadTestPreview();
     }
     if (tab === 'chapters') {
-      const chaptersList = document.getElementById('chaptersList');
-      if (chaptersList) {
-        chaptersList.innerHTML = `
-          <li style="text-align: center; color: var(--text-muted); font-style: italic;">
-            Select a test series and subject to view chapters
-          </li>
-        `;
-      }
+      document.getElementById('chaptersList').innerHTML = `
+        <li style="text-align: center; color: var(--text-muted); font-style: italic;">
+          Select a test series and subject to view chapters
+        </li>
+      `;
     }
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 7. Populate “Batch” <select> controls
+  // 7. Populate batch selects (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
   async function populateBatchSelects() {
     try {
       const batches = await api('batches');
       ['batchSelect', 'questionBatch', 'chapterBatch'].forEach(id => {
         const select = document.getElementById(id);
-        if (!select) return;
-        const firstOptionText = select.options.length ? select.options[0].text : '';
-        select.innerHTML = `<option value="">${ firstOptionText || 'Choose...' }</option>`;
+        const currentValue = select.value;
+        select.innerHTML = `<option value="">${select.options[0].text}</option>`;
         batches.forEach(batch => {
           const option = document.createElement('option');
           option.value = batch._id;
           option.textContent = `${batch.BatchID} – ${batch.name}`;
           select.appendChild(option);
         });
+        if (currentValue) select.value = currentValue;
       });
     } catch (error) {
       console.error('Error loading batches:', error);
@@ -1772,12 +1743,10 @@ textarea:focus-visible {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 8. Load “Test Series” dropdown for a given batch
+  // 8. Load test series for batch (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
   async function loadTestSeriesForBatch(batchId) {
     const select = document.getElementById('testSeries');
-    if (!select) return;
-
     select.innerHTML = '<option value="">Loading...</option>';
     window._testsCache = [];
 
@@ -1804,17 +1773,14 @@ textarea:focus-visible {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 9. Populate “Subject” <select> from cache (when a series is chosen)
+  // 9. Load subjects from cache (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
   function loadSubjects(seriesId, targetId) {
     const select = document.getElementById(targetId);
-    if (!select) return;
     select.innerHTML = '<option value="">Choose a subject</option>';
     if (!seriesId) return;
-
     const test = window._testsCache.find(t => t._id === seriesId);
     if (!test) return;
-
     test.subjects.forEach(subject => {
       const option = document.createElement('option');
       option.value = subject;
@@ -1824,12 +1790,10 @@ textarea:focus-visible {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 10. Load “Chapter Series” for a given batch (similar to loadTestSeries)
+  // 10. Load chapter series (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
   async function loadChapterSeries(batchId) {
     const select = document.getElementById('chapterSeries');
-    if (!select) return;
-
     select.innerHTML = '<option value="">Loading...</option>';
     if (!batchId) {
       select.innerHTML = '<option value="">Choose a test series</option>';
@@ -1853,23 +1817,21 @@ textarea:focus-visible {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 11. Load chapters (when series + subject are both selected)
+  // 11. Load chapters (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
   async function loadChapters() {
-    const series  = document.getElementById('chapterSeries')?.value;
-    const subject = document.getElementById('chapterSubject')?.value;
-    const list    = document.getElementById('chaptersList');
-    if (!list) return;
+    const series = document.getElementById('chapterSeries').value;
+    const subject = document.getElementById('chapterSubject').value;
+    const list = document.getElementById('chaptersList');
     list.innerHTML = '';
-
     if (!series || !subject) {
       list.innerHTML = `
         <li style="text-align: center; color: var(--text-muted); font-style: italic;">
           Select a test series and subject to view chapters
-        </li>`;
+        </li>
+      `;
       return;
     }
-
     try {
       const response = await api(`chapters/${series}/${subject}`);
       const chapters = response.chapters || [];
@@ -1877,7 +1839,8 @@ textarea:focus-visible {
         list.innerHTML = `
           <li style="text-align: center; color: var(--text-muted); font-style: italic;">
             No chapters found for this subject
-          </li>`;
+          </li>
+        `;
       } else {
         chapters.forEach(chapter => {
           const li = document.createElement('li');
@@ -1890,73 +1853,62 @@ textarea:focus-visible {
       list.innerHTML = `
         <li style="text-align: center; color: var(--error); font-style: italic;">
           Error loading chapters
-        </li>`;
+        </li>
+      `;
       showToast('Error loading chapters', 'error');
     }
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 12. Load “Test Preview” cards
+  // 12. Load test preview (unchanged)
   // ─────────────────────────────────────────────────────────────────────────────
   async function loadTestPreview() {
     const container = document.getElementById('testPreviewContainer');
-    if (!container) return;
-
     container.innerHTML = `
       <div class="loading-container">
         <div class="loading-spinner"></div>
         <div class="loading-text">Loading test series...</div>
-      </div>`;
-
+      </div>
+    `;
     try {
       const tests = await api('tests');
       container.innerHTML = '';
-
-      if (!tests.length) {
+      if (tests.length === 0) {
         container.innerHTML = `
           <div class="card">
             <div class="card-body" style="text-align: center; padding: 80px 20px;">
               <i class="fas fa-inbox" style="font-size: 64px; color: var(--text-muted); margin-bottom: 24px; opacity: 0.5;"></i>
-              <h3 style="color: var(--text-secondary); margin-bottom: 16px; font-size: 24px; font-weight: 700;">
-                No Tests Found
-              </h3>
-              <p style="color: var(--text-muted); font-size: 16px;">
-                Create your first test to get started
-              </p>
+              <h3 style="color: var(--text-secondary); margin-bottom: 16px; font-size: 24px; font-weight: 700;">No Tests Found</h3>
+              <p style="color: var(--text-muted); font-size: 16px;">Create your first test to get started</p>
             </div>
-          </div>`;
+          </div>
+        `;
         return;
       }
-
       const now = Date.now();
       tests.forEach(test => {
         const card = document.createElement('div');
         card.className = 'test-card';
-
         let status, statusClass, actionButton;
         if (test.published) {
           status = 'Published';
           statusClass = 'status-published';
-          actionButton = `
-            <button class="btn btn-danger btn-sm" onclick="deleteTest('${test._id}')">
-              <i class="fas fa-trash"></i> Delete
-            </button>`;
+          actionButton = `<button class="btn btn-danger btn-sm" onclick="deleteTest('${test._id}')">
+            <i class="fas fa-trash"></i> Delete
+          </button>`;
         } else if (test.scheduledAt && now < new Date(test.scheduledAt).getTime()) {
           status = 'Scheduled';
           statusClass = 'status-scheduled';
-          actionButton = `
-            <button class="btn btn-secondary btn-sm" disabled>
-              <i class="fas fa-clock"></i> Pending
-            </button>`;
+          actionButton = `<button class="btn btn-secondary btn-sm" disabled>
+            <i class="fas fa-clock"></i> Pending
+          </button>`;
         } else {
           status = 'Ready';
           statusClass = 'status-ready';
-          actionButton = `
-            <button class="btn btn-success btn-sm" onclick="sendTest('${test._id}')">
-              <i class="fas fa-paper-plane"></i> Publish
-            </button>`;
+          actionButton = `<button class="btn btn-success btn-sm" onclick="sendTest('${test._id}')">
+            <i class="fas fa-paper-plane"></i> Publish
+          </button>`;
         }
-
         card.innerHTML = `
           <div class="test-header">
             <div>
@@ -1978,7 +1930,8 @@ textarea:focus-visible {
                   <div class="test-detail">
                     <i class="fas fa-calendar"></i>
                     <span>Schedule: ${new Date(test.scheduledAt).toLocaleString()}</span>
-                  </div>` : ''}
+                  </div>
+                ` : ''}
               </div>
             </div>
             <div class="test-status ${statusClass}">
@@ -1991,8 +1944,8 @@ textarea:focus-visible {
               <i class="fas fa-eye"></i> Preview
             </button>
             ${actionButton}
-          </div>`;
-
+          </div>
+        `;
         container.appendChild(card);
       });
     } catch (error) {
@@ -2001,25 +1954,21 @@ textarea:focus-visible {
         <div class="card">
           <div class="card-body" style="text-align: center; padding: 80px 20px;">
             <i class="fas fa-exclamation-triangle" style="font-size: 64px; color: var(--error); margin-bottom: 24px;"></i>
-            <h3 style="color: var(--error); margin-bottom: 16px; font-size: 24px; font-weight: 700;">
-              Error Loading Tests
-            </h3>
-            <p style="color: var(--text-muted); font-size: 16px;">
-              Please try again later
-            </p>
+            <h3 style="color: var(--error); margin-bottom: 16px; font-size: 24px; font-weight: 700;">Error Loading Tests</h3>
+            <p style="color: var(--text-muted); font-size: 16px;">Please try again later</p>
           </div>
-        </div>`;
+        </div>
+      `;
       showToast('Error loading tests', 'error');
     }
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 13. Test Actions: deleteTest(), sendTest(), previewTest()
+  // 13. Test actions (DELETE now cascades related data)
   // ─────────────────────────────────────────────────────────────────────────────
   window.deleteTest = async (id) => {
-    if (!confirm('Are you sure you want to delete this test and all its data? This action cannot be undone.')) {
+    if (!confirm('Are you sure you want to delete this test and all its data? This action cannot be undone.')) 
       return;
-    }
     try {
       // 1) Delete all questions for this test
       await api(`questions/test/${id}`, { method: 'DELETE' });
@@ -2036,9 +1985,8 @@ textarea:focus-visible {
   };
 
   window.sendTest = async (id) => {
-    if (!confirm('Are you sure you want to publish this test? Students will be able to access it immediately.')) {
+    if (!confirm('Are you sure you want to publish this test? Students will be able to access it immediately.'))
       return;
-    }
     try {
       await api(`tests/${id}/publish`, { method: 'PATCH' });
       showToast('Test published successfully', 'success');
@@ -2049,7 +1997,7 @@ textarea:focus-visible {
     }
   };
 
-  window.previewTest = (id) => {
+  window.previewTest = async (id) => {
     try {
       window.open(`/preview.html?test=${id}`, '_blank');
     } catch (err) {
@@ -2058,430 +2006,312 @@ textarea:focus-visible {
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 14. DOMContentLoaded → Initialize everything
+  // 14. Initialize when DOM is loaded
   // ─────────────────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.1. Add text‐formatting (Ctrl+U = <sup>, Ctrl+D = <sub>) to text inputs
-    // ────────────────────────────────────────────────────────────────────────────
-    [
+    // Add text formatting to all relevant text inputs and textareas
+    const textElements = [
       'question',
       'solution',
       'optionA',
-      'optionB',
+      'optionB', 
       'optionC',
       'optionD'
-    ].forEach(id => {
+    ];
+    textElements.forEach(id => {
       const element = document.getElementById(id);
-      if (element) {
-        addTextFormattingToElement(element);
-      }
+      if (element) addTextFormattingToElement(element);
     });
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.2. Tab switching (nav items + mobile nav items)
-    // ────────────────────────────────────────────────────────────────────────────
+    // Tab switching
     document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
-      item.addEventListener('click', e => {
+      item.addEventListener('click', (e) => {
         e.preventDefault();
         switchTab(item.dataset.tab);
       });
     });
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.3. FAB (Floating Action Button) → open batchModal
-    // ────────────────────────────────────────────────────────────────────────────
+    // FAB functionality
     const fab = document.getElementById('fab');
     if (fab) {
       fab.addEventListener('click', () => {
-        const batchModal = document.getElementById('batchModal');
-        if (batchModal) {
-          batchModal.style.display = 'flex';
-        }
+        document.getElementById('batchModal').style.display = 'flex';
       });
     }
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.4. Modal “close” buttons
-    // ────────────────────────────────────────────────────────────────────────────
+    // Modal functionality
     document.querySelectorAll('.modal-close').forEach(closeBtn => {
       closeBtn.addEventListener('click', () => {
-        const modal = closeBtn.closest('.modal');
-        if (modal) {
-          modal.style.display = 'none';
-        }
+        closeBtn.closest('.modal').style.display = 'none';
       });
     });
-    window.addEventListener('click', e => {
+    window.addEventListener('click', (e) => {
       if (e.target.classList.contains('modal')) {
         e.target.style.display = 'none';
       }
     });
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.5. Batch Form Submission
-    // ────────────────────────────────────────────────────────────────────────────
-    const batchForm = document.getElementById('batch-form');
-    if (batchForm) {
-      batchForm.addEventListener('submit', async e => {
-        e.preventDefault();
-        const nameInput = document.getElementById('batchName');
-        const name = nameInput ? nameInput.value.trim() : '';
-        if (!name) {
-          showToast('Please enter batch name', 'error');
+    // Form submissions: Batches
+    document.getElementById('batch-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('batchName').value.trim();
+      if (!name) {
+        showToast('Please enter batch name', 'error');
+        return;
+      }
+      try {
+        await api('batches', { 
+          method: 'POST', 
+          body: JSON.stringify({ name }) 
+        });
+        showToast('Batch added successfully!', 'success');
+        e.target.reset();
+        document.getElementById('batchModal').style.display = 'none';
+        populateBatchSelects();
+      } catch (error) {
+        console.error('Error adding batch:', error);
+        showToast('Error adding batch', 'error');
+      }
+    });
+
+    // Form submissions: Test setup
+    document.getElementById('test-setup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const testName = document.getElementById('testName').value.trim();
+      const batch = document.getElementById('batchSelect').value;
+      const testDuration = parseInt(document.getElementById('testDuration').value);
+      const subjects = document.getElementById('subjects').value.split(',')
+                          .map(s => s.trim()).filter(s => s);
+      const scheduledAt = document.getElementById('scheduledDate').value;
+      if (!testName || !batch || !testDuration || !subjects.length || !scheduledAt) {
+        showToast('All fields are required', 'error');
+        return;
+      }
+      if (testDuration < 1 || testDuration > 300) {
+        showToast('Duration must be between 1 and 300 minutes', 'error');
+        return;
+      }
+      try {
+        await api('tests', {
+          method: 'POST',
+          body: JSON.stringify({ testName, batch, testDuration, subjects, scheduledAt })
+        });
+        showToast('Test created successfully!', 'success');
+        e.target.reset();
+      } catch (error) {
+        console.error('Error creating test:', error);
+        showToast('Error creating test', 'error');
+      }
+    });
+
+    // Cascading for question form
+    document.getElementById('questionBatch').addEventListener('change', (e) => {
+      loadTestSeriesForBatch(e.target.value);
+      document.getElementById('subject').innerHTML = '<option value="">Choose a subject</option>';
+    });
+    document.getElementById('testSeries').addEventListener('change', (e) => {
+      loadSubjects(e.target.value, 'subject');
+    });
+
+    // Question type toggle
+    document.getElementById('questionType').addEventListener('change', (e) => {
+      const mcqSection = document.getElementById('mcq-section');
+      const integerSection = document.getElementById('integer-section');
+      mcqSection.style.display = e.target.value === 'MCQ' ? 'block' : 'none';
+      integerSection.style.display = e.target.value === 'Integer' ? 'block' : 'none';
+    });
+
+    // Question form submission
+    document.getElementById('question-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const batch = document.getElementById('questionBatch').value;
+      const series = document.getElementById('testSeries').value;
+      const subject = document.getElementById('subject').value;
+      if (!batch || !series || !subject) {
+        showToast('Please select batch, series & subject!', 'error');
+        return;
+      }
+      const data = {
+        test: series,
+        subject: subject,
+        question: document.getElementById('question').value.trim(),
+        questionType: document.getElementById('questionType').value,
+        solution: document.getElementById('solution').value.trim()
+      };
+      if (!data.question) {
+        showToast('Please enter the question text!', 'error');
+        return;
+      }
+      if (data.questionType === 'MCQ') {
+        data.options = ['optionA', 'optionB', 'optionC', 'optionD'].map(id => 
+          document.getElementById(id).value.trim()
+        );
+        data.correctAnswer = document.getElementById('correctAnswer').value;
+        if (data.options.some(option => !option)) {
+          showToast('Please fill all MCQ options!', 'error');
           return;
         }
-        try {
-          await api('batches', {
-            method: 'POST',
-            body: JSON.stringify({ name })
-          });
-          showToast('Batch added successfully!', 'success');
-          batchForm.reset();
-          const batchModal = document.getElementById('batchModal');
-          if (batchModal) batchModal.style.display = 'none';
-          populateBatchSelects();
-        } catch (error) {
-          console.error('Error adding batch:', error);
-          showToast('Error adding batch', 'error');
-        }
-      });
-    }
-
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.6. Test Setup Form Submission
-    // ────────────────────────────────────────────────────────────────────────────
-    const testSetupForm = document.getElementById('test-setup-form');
-    if (testSetupForm) {
-      testSetupForm.addEventListener('submit', async e => {
-        e.preventDefault();
-        const testNameInput    = document.getElementById('testName');
-        const batchSelect      = document.getElementById('batchSelect');
-        const testDurationInput= document.getElementById('testDuration');
-        const subjectsInput    = document.getElementById('subjects');
-        const scheduledDate    = document.getElementById('scheduledDate');
-
-        const testName     = testNameInput    ? testNameInput.value.trim() : '';
-        const batch        = batchSelect      ? batchSelect.value : '';
-        const testDuration = testDurationInput? parseInt(testDurationInput.value) : 0;
-        const subjects     = subjectsInput    ? subjectsInput.value.split(',').map(s => s.trim()).filter(s => s) : [];
-        const scheduledAt  = scheduledDate    ? scheduledDate.value : '';
-
-        if (!testName || !batch || !testDuration || !subjects.length || !scheduledAt) {
-          showToast('All fields are required', 'error');
+        if (!data.correctAnswer) {
+          showToast('Please select the correct answer!', 'error');
           return;
         }
-        if (testDuration < 1 || testDuration > 300) {
-          showToast('Duration must be between 1 and 300 minutes', 'error');
+      } else {
+        data.correctAnswer = document.getElementById('integerAnswer').value.trim();
+        if (!data.correctAnswer) {
+          showToast('Please enter the integer answer!', 'error');
           return;
         }
-        try {
-          await api('tests', {
-            method: 'POST',
-            body: JSON.stringify({ testName, batch, testDuration, subjects, scheduledAt })
-          });
-          showToast('Test created successfully!', 'success');
-          testSetupForm.reset();
-        } catch (error) {
-          console.error('Error creating test:', error);
-          showToast('Error creating test', 'error');
-        }
-      });
-    }
+      }
+      try {
+        await api('questions', { 
+          method: 'POST', 
+          body: JSON.stringify(data) 
+        });
+        showToast('Question added successfully!', 'success');
+        ['question', 'solution'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        ['optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer', 'integerAnswer'].forEach(id => {
+          const elm = document.getElementById(id);
+          if (elm) elm.value = '';
+        });
+      } catch (error) {
+        console.error('Error adding question:', error);
+        showToast('Error adding question', 'error');
+      }
+    });
 
     // ────────────────────────────────────────────────────────────────────────────
-    // 14.7. Cascading “Add Question” Form: batch → load series → load subjects
+    // 15. Preview functionality (updated to render LaTeX via MathJax)
     // ────────────────────────────────────────────────────────────────────────────
-    const questionBatchSelect = document.getElementById('questionBatch');
-    if (questionBatchSelect) {
-      questionBatchSelect.addEventListener('change', e => {
-        loadTestSeriesForBatch(e.target.value);
-        const subjectSelect = document.getElementById('subject');
-        if (subjectSelect) {
-          subjectSelect.innerHTML = '<option value="">Choose a subject</option>';
-        }
-      });
-    }
+    document.getElementById('previewBtn').addEventListener('click', () => {
+      const previewContent = document.getElementById('previewContent');
+      let html = '<div style="padding: 24px; line-height: 1.6;">';
 
-    const testSeriesSelect = document.getElementById('testSeries');
-    if (testSeriesSelect) {
-      testSeriesSelect.addEventListener('change', e => {
-        loadSubjects(e.target.value, 'subject');
-      });
-    }
+      // Render question (with LaTeX if present)
+      const questionRaw = document.getElementById('question').value.trim();
+      const questionHTML = questionRaw
+        ? `<div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-lg); margin-bottom: 24px; border-left: 4px solid var(--primary); line-height: 1.6;">
+             ${renderLatex(questionRaw)}
+           </div>`
+        : '<p style="color: var(--text-muted); font-style: italic; margin-bottom: 24px;">No question provided</p>';
+      html += `
+        <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px;">
+          <i class="fas fa-question-circle"></i>Question:
+        </h4>
+        ${questionHTML}
+      `;
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.8. Question Type Toggle (MCQ vs Integer)
-    // ────────────────────────────────────────────────────────────────────────────
-    const questionTypeSelect = document.getElementById('questionType');
-    if (questionTypeSelect) {
-      questionTypeSelect.addEventListener('change', e => {
-        const mcqSection     = document.getElementById('mcq-section');
-        const integerSection = document.getElementById('integer-section');
-        if (mcqSection && integerSection) {
-          mcqSection.style.display     = e.target.value === 'MCQ' ? 'block' : 'none';
-          integerSection.style.display = e.target.value === 'Integer' ? 'block' : 'none';
-        }
-      });
-    }
+      // Render question type
+      const questionType = document.getElementById('questionType').value;
+      html += `
+        <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+          <i class="fas fa-list"></i>Type: ${questionType}
+        </h4>
+      `;
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.9. “Add Question” Form Submission
-    // ────────────────────────────────────────────────────────────────────────────
-    const questionForm = document.getElementById('question-form');
-    if (questionForm) {
-      questionForm.addEventListener('submit', async e => {
-        e.preventDefault();
-
-        const batch   = document.getElementById('questionBatch')?.value;
-        const series  = document.getElementById('testSeries')?.value;
-        const subject = document.getElementById('subject')?.value;
-        if (!batch || !series || !subject) {
-          showToast('Please select batch, series & subject!', 'error');
-          return;
-        }
-
-        const questionText = document.getElementById('question')?.value.trim() || '';
-        const questionType = document.getElementById('questionType')?.value;
-        const solutionText = document.getElementById('solution')?.value.trim() || '';
-
-        if (!questionText) {
-          showToast('Please enter the question text!', 'error');
-          return;
-        }
-
-        const data = {
-          test: series,
-          subject: subject,
-          question: questionText,
-          questionType: questionType,
-          solution: solutionText
-        };
-
-        if (questionType === 'MCQ') {
-          // Collect all four MCQ option values
-          const opts = ['optionA','optionB','optionC','optionD'].map(id => {
-            return document.getElementById(id)?.value.trim() || '';
-          });
-          // Which radio/select holds the correct answer?
-          const correctAnswer = document.getElementById('correctAnswer')?.value;
-
-          if (opts.some(opt => !opt)) {
-            showToast('Please fill all MCQ options!', 'error');
-            return;
-          }
-          if (!correctAnswer) {
-            showToast('Please select the correct answer!', 'error');
-            return;
-          }
-
-          data.options = opts;
-          data.correctAnswer = correctAnswer;
-        } else {
-          // Integer‐type question
-          const intAns = document.getElementById('integerAnswer')?.value.trim() || '';
-          if (!intAns) {
-            showToast('Please enter the integer answer!', 'error');
-            return;
-          }
-          data.correctAnswer = intAns;
-        }
-
-        try {
-          await api('questions', {
-            method: 'POST',
-            body: JSON.stringify(data)
-          });
-          showToast('Question added successfully!', 'success');
-
-          // Clear all relevant fields after successful POST
-          document.getElementById('question')?.value       = '';
-          document.getElementById('solution')?.value       = '';
-          ['optionA','optionB','optionC','optionD','correctAnswer','integerAnswer'].forEach(id => {
-            const elm = document.getElementById(id);
-            if (elm) elm.value = '';
-          });
-        } catch (error) {
-          console.error('Error adding question:', error);
-          showToast('Error adding question', 'error');
-        }
-      });
-    }
-
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.10. “Preview” Button: build an HTML preview (with MathJax)
-    // ────────────────────────────────────────────────────────────────────────────
-    const previewBtn = document.getElementById('previewBtn');
-    if (previewBtn) {
-      previewBtn.addEventListener('click', () => {
-        const previewContent = document.getElementById('previewContent');
-        if (!previewContent) return;
-
-        let html = '<div style="padding: 24px; line-height: 1.6;">';
-
-        // 1) Question (with LaTeX)
-        const questionRaw = document.getElementById('question')?.value.trim() || '';
-        let questionHTML;
-        if (questionRaw) {
-          questionHTML = `
-            <div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-lg);
-                        margin-bottom: 24px; border-left: 4px solid var(--primary); line-height: 1.6;">
-              ${renderLatex(questionRaw)}
-            </div>`;
-        } else {
-          questionHTML = '<p style="color: var(--text-muted); font-style: italic; margin-bottom: 24px;">No question provided</p>';
-        }
+      // Render options or integer answer
+      if (questionType === 'MCQ') {
         html += `
-          <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 18px; font-weight: 700;
-                     display: flex; align-items: center; gap: 12px;">
-            <i class="fas fa-question-circle"></i>Question:
-          </h4>
-          ${questionHTML}
+          <div style="background: var(--bg-tertiary); padding: 24px; border-radius: var(--radius-lg); margin-bottom: 24px;">
+            <ol type="A" style="margin: 0; padding-left: 24px;">
         `;
+        ['optionA', 'optionB', 'optionC', 'optionD'].forEach(id => {
+          const rawValue = document.getElementById(id).value.trim() || '–';
+          html += `
+            <li style="margin-bottom: 12px; padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border); font-weight: 500;">
+              ${renderLatex(rawValue)}
+            </li>
+          `;
+        });
+        html += `</ol></div>`;
 
-        // 2) Question Type
-        const questionType = document.getElementById('questionType')?.value || 'MCQ';
+        const answer = document.getElementById('correctAnswer').value || '–';
         html += `
-          <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 16px; font-weight: 600;
-                     display: flex; align-items: center; gap: 12px;">
-            <i class="fas fa-list"></i>Type: ${questionType}
+          <h4 style="color: var(--success); margin-bottom: 24px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-check-circle"></i>Correct Answer: Option ${answer}
           </h4>
         `;
-
-        // 3) MCQ options or Integer answer
-        if (questionType === 'MCQ') {
-          html += `
-            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: var(--radius-lg);
-                        margin-bottom: 24px;">
-              <ol type="A" style="margin: 0; padding-left: 24px;">
-          `;
-          ['optionA','optionB','optionC','optionD'].forEach(id => {
-            const rawValue = document.getElementById(id)?.value.trim() || '–';
-            html += `
-              <li style="margin-bottom: 12px; padding: 12px; background: var(--bg-secondary);
-                         border-radius: var(--radius-md); border: 1px solid var(--border); font-weight: 500;">
-                ${renderLatex(rawValue)}
-              </li>
-            `;
-          });
-          html += `</ol></div>`;
-
-          const answer = document.getElementById('correctAnswer')?.value || '–';
-          html += `
-            <h4 style="color: var(--success); margin-bottom: 24px; font-size: 16px; font-weight: 600;
-                       display: flex; align-items: center; gap: 12px;">
-              <i class="fas fa-check-circle"></i>Correct Answer: Option ${answer}
-            </h4>
-          `;
-        } else {
-          const answerRaw = document.getElementById('integerAnswer')?.value.trim() || '–';
-          html += `
-            <h4 style="color: var(--success); margin-bottom: 24px; font-size: 16px; font-weight: 600;
-                       display: flex; align-items: center; gap: 12px;">
-              <i class="fas fa-hashtag"></i>Correct Answer: ${renderLatex(answerRaw)}
-            </h4>
-          `;
-        }
-
-        // 4) Solution
-        const solutionRaw = document.getElementById('solution')?.value.trim() || '';
-        let solutionHTML;
-        if (solutionRaw) {
-          solutionHTML = `
-            <div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-lg);
-                        border-left: 4px solid var(--secondary); line-height: 1.6;">
-              ${renderLatex(solutionRaw)}
-            </div>`;
-        } else {
-          solutionHTML = '<p style="color: var(--text-muted); font-style: italic;">No solution provided</p>';
-        }
+      } else {
+        const answerRaw = document.getElementById('integerAnswer').value.trim() || '–';
         html += `
-          <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 16px; font-weight: 600;
-                     display: flex; align-items: center; gap: 12px;">
-            <i class="fas fa-lightbulb"></i>Solution:
+          <h4 style="color: var(--success); margin-bottom: 24px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-hashtag"></i>Correct Answer: ${renderLatex(answerRaw)}
           </h4>
-          ${solutionHTML}
         `;
+      }
 
-        html += '</div>';
-        previewContent.innerHTML = html;
+      // Render solution
+      const solutionRaw = document.getElementById('solution').value.trim();
+      const solutionHTML = solutionRaw
+        ? `<div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-lg); border-left: 4px solid var(--secondary); line-height: 1.6;">
+             ${renderLatex(solutionRaw)}
+           </div>`
+        : '<p style="color: var(--text-muted); font-style: italic;">No solution provided</p>';
+      html += `
+        <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+          <i class="fas fa-lightbulb"></i>Solution:
+        </h4>
+        ${solutionHTML}
+      `;
 
-        // Show the previewModal (if it exists)
-        const previewModal = document.getElementById('previewModal');
-        if (previewModal) {
-          previewModal.style.display = 'flex';
-        }
+      html += '</div>';
+      previewContent.innerHTML = html;
+      document.getElementById('previewModal').style.display = 'flex';
 
-        // Trigger MathJax typesetting
-        if (window.MathJax) {
-          MathJax.typesetPromise([previewContent]).catch(err => console.error("MathJax error:", err));
-        }
-      });
-    }
-
-    // ────────────────────────────────────────────────────────────────────────────
-    // 14.11. “Chapter” Form cascades
-    // ────────────────────────────────────────────────────────────────────────────
-    const chapterBatchSelect = document.getElementById('chapterBatch');
-    if (chapterBatchSelect) {
-      chapterBatchSelect.addEventListener('change', e => {
-        loadChapterSeries(e.target.value);
-        const subj = document.getElementById('chapterSubject');
-        if (subj) subj.innerHTML = '<option value="">Choose a subject</option>';
-      });
-    }
-
-    const chapterSeriesSelect = document.getElementById('chapterSeries');
-    if (chapterSeriesSelect) {
-      chapterSeriesSelect.addEventListener('change', e => {
-        loadSubjects(e.target.value, 'chapterSubject');
-      });
-    }
-
-    const chapterSubjectSelect = document.getElementById('chapterSubject');
-    if (chapterSubjectSelect) {
-      chapterSubjectSelect.addEventListener('change', loadChapters);
-    }
+      // Trigger MathJax to typeset any LaTeX in the preview container
+      if (window.MathJax) {
+        MathJax.typesetPromise([previewContent]).catch(err => console.error("MathJax error:", err));
+      }
+    });
 
     // ────────────────────────────────────────────────────────────────────────────
-    // 14.12. “Add Chapter” Form Submission
+    // 16. Chapter form cascades (unchanged)
     // ────────────────────────────────────────────────────────────────────────────
-    const chapterForm = document.getElementById('chapter-form');
-    if (chapterForm) {
-      chapterForm.addEventListener('submit', async e => {
-        e.preventDefault();
-        const body = {
-          test: document.getElementById('chapterSeries')?.value,
-          subject: document.getElementById('chapterSubject')?.value,
-          name: document.getElementById('chapterName')?.value.trim()
-        };
-        if (!body.test || !body.subject || !body.name) {
-          showToast('All fields are required', 'error');
-          return;
-        }
-        try {
-          await api('chapters', {
-            method: 'POST',
-            body: JSON.stringify(body)
-          });
-          showToast(`Chapter "${body.name}" added successfully`, 'success');
-          document.getElementById('chapterName').value = '';
-          loadChapters();
-        } catch (error) {
-          console.error('Error adding chapter:', error);
-          showToast('Error adding chapter', 'error');
-        }
-      });
-    }
+    document.getElementById('chapterBatch').addEventListener('change', (e) => {
+      loadChapterSeries(e.target.value);
+      document.getElementById('chapterSubject').innerHTML = '<option value="">Choose a subject</option>';
+    });
+    document.getElementById('chapterSeries').addEventListener('change', (e) => {
+      loadSubjects(e.target.value, 'chapterSubject');
+    });
+    document.getElementById('chapterSubject').addEventListener('change', loadChapters);
 
     // ────────────────────────────────────────────────────────────────────────────
-    // 14.13. Final Initialization: populate batches & set default tab
+    // 17. Chapter form submission (unchanged)
+    // ────────────────────────────────────────────────────────────────────────────
+    document.getElementById('chapter-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = {
+        test: document.getElementById('chapterSeries').value,
+        subject: document.getElementById('chapterSubject').value,
+        name: document.getElementById('chapterName').value.trim()
+      };
+      if (!body.test || !body.subject || !body.name) {
+        showToast('All fields are required', 'error');
+        return;
+      }
+      try {
+        await api('chapters', { 
+          method: 'POST', 
+          body: JSON.stringify(body) 
+        });
+        showToast(`Chapter "${body.name}" added successfully`, 'success');
+        document.getElementById('chapterName').value = '';
+        loadChapters();
+      } catch (error) {
+        console.error('Error adding chapter:', error);
+        showToast('Error adding chapter', 'error');
+      }
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 18. Initialize: populate batches & default tab (unchanged)
     // ────────────────────────────────────────────────────────────────────────────
     populateBatchSelects();
     switchTab('test-setup');
   });
 </script>
-
 
 </body>
 </html>
