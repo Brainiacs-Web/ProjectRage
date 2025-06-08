@@ -958,8 +958,20 @@ textarea:focus-visible {
     </main>
   </div>
 
-  <script>
-  // Theme management
+ <script>
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 1. LaTeX Rendering Helper
+  // ─────────────────────────────────────────────────────────────────────────────
+  const renderLatex = (str) => {
+    if (!str) return "—";
+    const hasDisplayMath = /\$\$[\s\S]*\$\$/.test(str);
+    const hasInlineFrac   = /\\frac\s*{[^}]+}\s*{[^}]+}/.test(str);
+    return (hasDisplayMath || hasInlineFrac) ? `\\(${str}\\)` : str;
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 2. Theme management
+  // ─────────────────────────────────────────────────────────────────────────────
   const themeToggle = document.getElementById('themeToggle');
   const body = document.body;
   function toggleTheme() {
@@ -981,14 +993,16 @@ textarea:focus-visible {
   }
   themeToggle.addEventListener('click', toggleTheme);
 
-  // Toast notifications
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 3. Toast notifications
+  // ─────────────────────────────────────────────────────────────────────────────
   function showToast(message, type = "info") {
     const toast = document.createElement("div");
     toast.className = `toast toast-${type}`;
-    const icon = type === "error" 
+    const icon = type === "error"
       ? "fas fa-exclamation-circle"
-      : type === "success" 
-        ? "fas fa-check-circle" 
+      : type === "success"
+        ? "fas fa-check-circle"
         : "fas fa-info-circle";
     toast.innerHTML = `<i class="${icon}"></i><span>${message}</span>`;
     document.body.appendChild(toast);
@@ -996,13 +1010,15 @@ textarea:focus-visible {
     setTimeout(() => {
       toast.classList.remove('show');
       setTimeout(() => {
-        if (document.body.contains(toast)) 
+        if (document.body.contains(toast))
           document.body.removeChild(toast);
       }, 300);
     }, 3000);
   }
 
-  // API helper
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 4. API helper
+  // ─────────────────────────────────────────────────────────────────────────────
   async function api(path, opts = {}) {
     try {
       const response = await fetch('/api/' + path, {
@@ -1017,14 +1033,17 @@ textarea:focus-visible {
     }
   }
 
-  // State
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 5. State
+  // ─────────────────────────────────────────────────────────────────────────────
   const params   = new URLSearchParams(window.location.search);
   const testId   = params.get('test') || '';
   let testName   = '', subjects = [], questions = [];
   let currentSub = '', currentIdx = 0, inEditMode = false;
-  let undoStack = [], redoStack = [];
 
-  // Load test metadata
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 6. Load test metadata
+  // ─────────────────────────────────────────────────────────────────────────────
   async function loadTest() {
     try {
       const test = await api(`tests/${testId}`);
@@ -1038,7 +1057,9 @@ textarea:focus-visible {
     }
   }
 
-  // Build subject tabs
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 7. Build subject tabs
+  // ─────────────────────────────────────────────────────────────────────────────
   function buildSubjectButtons() {
     const container = document.getElementById('subject-buttons');
     container.innerHTML = '';
@@ -1051,7 +1072,9 @@ textarea:focus-visible {
     });
   }
 
-  // Switch subject
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 8. Switch subject
+  // ─────────────────────────────────────────────────────────────────────────────
   async function switchSubject(subject) {
     currentSub = subject;
     document.querySelectorAll('.subject-tab')
@@ -1060,13 +1083,15 @@ textarea:focus-visible {
     await loadQuestions();
   }
 
-  // Load questions
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 9. Load questions for current subject
+  // ─────────────────────────────────────────────────────────────────────────────
   async function loadQuestions() {
     try {
       const res = await api(`questions?test=${testId}&subject=${encodeURIComponent(currentSub)}`);
       questions = res.questions || [];
-      currentIdx = 0; inEditMode = false;
-      undoStack = []; redoStack = [];
+      currentIdx = 0;
+      inEditMode = false;
       renderQuestionList();
       renderQuestion();
     } catch {
@@ -1074,7 +1099,9 @@ textarea:focus-visible {
     }
   }
 
-  // Render sidebar
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 10. Render sidebar (question list)
+  // ─────────────────────────────────────────────────────────────────────────────
   function renderQuestionList() {
     const list = document.getElementById('question-list');
     list.innerHTML = '';
@@ -1083,7 +1110,7 @@ textarea:focus-visible {
       updateNavigation();
       return;
     }
-    questions.forEach((q,i) => {
+    questions.forEach((q, i) => {
       const li = document.createElement('li');
       li.className = 'question-item';
       li.classList.toggle('active', i === currentIdx);
@@ -1099,7 +1126,9 @@ textarea:focus-visible {
     updateNavigation();
   }
 
-  // Render main pane
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 11. Render main pane
+  // ─────────────────────────────────────────────────────────────────────────────
   function renderQuestion() {
     const c = document.getElementById('question-content');
     if (!questions.length) {
@@ -1115,7 +1144,9 @@ textarea:focus-visible {
     updateNavigation();
   }
 
-  // View mode
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 12. View mode with LaTeX rendering
+  // ─────────────────────────────────────────────────────────────────────────────
   function renderQuestionView(q) {
     const c = document.getElementById('question-content');
     let html = `<div class="question-card">
@@ -1123,15 +1154,16 @@ textarea:focus-visible {
         <div class="meta-item"><i class="fas fa-hashtag"></i> Q${currentIdx+1}</div>
         <div class="meta-item"><i class="fas fa-tag"></i> ${q.questionType}</div>
       </div>
-      <div class="question-text">${q.question||'—'}</div>`;
-    if (q.questionType==='MCQ') {
+      <div class="question-text">${renderLatex(q.question)}</div>`;
+    if (q.questionType === 'MCQ') {
       html += `<div class="options-container">
         <div class="options-title"><i class="fas fa-list"></i> Options</div>
         <ol class="options-list" type="A">`;
-      q.options.forEach((opt,idx) => {
-        const L = String.fromCharCode(65+idx);
-        html += `<li class="option-item${q.correctAnswer===L?' correct':''}">
-          <div class="option-label">${L}</div><span>${opt||'—'}</span>
+      q.options.forEach((opt, idx) => {
+        const L = String.fromCharCode(65 + idx);
+        html += `<li class="option-item${q.correctAnswer === L ? ' correct' : ''}">
+          <div class="option-label">${L}</div>
+          <span>${renderLatex(opt)}</span>
         </li>`;
       });
       html += `</ol></div>
@@ -1142,13 +1174,13 @@ textarea:focus-visible {
     } else {
       html += `<div class="answer-section">
         <div class="answer-title"><i class="fas fa-hashtag"></i> Correct Answer</div>
-        <div class="answer-value">${q.answer||'—'}</div>
+        <div class="answer-value">${renderLatex(q.answer)}</div>
       </div>`;
     }
     if (q.solution) {
       html += `<div class="solution-section">
         <div class="solution-title"><i class="fas fa-lightbulb"></i> Solution</div>
-        <div class="solution-text">${q.solution}</div>
+        <div class="solution-text">${renderLatex(q.solution)}</div>
       </div>`;
     }
     html += `<div class="action-buttons">
@@ -1157,32 +1189,39 @@ textarea:focus-visible {
       </div>
     </div>`;
     c.innerHTML = html;
+
+    // Trigger MathJax to typeset any LaTeX
+    if (window.MathJax) {
+      MathJax.typesetPromise([c]).catch(err => console.error("MathJax error:", err));
+    }
   }
 
-  // Edit mode
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 13. Edit mode (no LaTeX rendering, raw editing)
+  // ─────────────────────────────────────────────────────────────────────────────
   function renderEditForm(q) {
     const c = document.getElementById('question-content');
     let html = `<div class="question-card">
       <form class="edit-form" onsubmit="saveQuestion(event)" novalidate>
         <div class="form-group">
           <label for="edit-question"><i class="fas fa-edit"></i> Question Text</label>
-          <textarea id="edit-question" name="question" class="form-textarea" required>${q.question||''}</textarea>
+          <textarea id="edit-question" name="question" class="form-textarea" required>${q.question || ''}</textarea>
         </div>
         <div class="form-group">
           <label for="edit-type"><i class="fas fa-list"></i> Question Type</label>
           <select id="edit-type" name="type" class="form-select" onchange="toggleQuestionType()" required>
-            <option value="MCQ"${q.questionType==='MCQ'?' selected':''}>MCQ</option>
-            <option value="Integer"${q.questionType==='Integer'?' selected':''}>Integer</option>
+            <option value="MCQ"${q.questionType === 'MCQ' ? ' selected' : ''}>MCQ</option>
+            <option value="Integer"${q.questionType === 'Integer' ? ' selected' : ''}>Integer</option>
           </select>
         </div>
-        <div id="mcq-options" style="display:${q.questionType==='MCQ'?'block':'none'}">
+        <div id="mcq-options" style="display:${q.questionType === 'MCQ' ? 'block' : 'none'}">
           <div class="form-group"><label><i class="fas fa-list-ol"></i> Options</label>
             <div class="grid-options">`;
-    ['A','B','C','D'].forEach((L,i) => {
+    ['A','B','C','D'].forEach((L, i) => {
       html += `<div>
         <label for="edit-option-${L}">Option ${L}</label>
         <input type="text" id="edit-option-${L}" name="option${L}"
-               class="form-input" value="${(q.options[i]||'')}" required>
+               class="form-input" value="${q.options[i] || ''}" required>
       </div>`;
     });
     html += `   </div></div>
@@ -1191,21 +1230,21 @@ textarea:focus-visible {
             <select id="edit-correct" name="correctAnswer" class="form-select" required>
               <option value="">Select correct answer</option>`;
     ['A','B','C','D'].forEach(L => {
-      html += `<option value="${L}"${q.correctAnswer===L?' selected':''}>${L}</option>`;
+      html += `<option value="${L}"${q.correctAnswer === L ? ' selected' : ''}>${L}</option>`;
     });
     html += `   </select>
           </div>
         </div>
-        <div id="integer-answer" style="display:${q.questionType==='Integer'?'block':'none'}">
+        <div id="integer-answer" style="display:${q.questionType === 'Integer' ? 'block' : 'none'}">
           <div class="form-group">
             <label for="edit-answer"><i class="fas fa-hashtag"></i> Correct Answer</label>
             <input type="number" id="edit-answer" name="answer"
-                   class="form-input" value="${q.answer||''}" required>
+                   class="form-input" value="${q.answer || ''}" required>
           </div>
         </div>
         <div class="form-group">
           <label for="edit-solution"><i class="fas fa-lightbulb"></i> Solution</label>
-          <textarea id="edit-solution" name="solution" class="form-textarea">${q.solution||''}</textarea>
+          <textarea id="edit-solution" name="solution" class="form-textarea">${q.solution || ''}</textarea>
         </div>
         <div class="action-buttons">
           <button type="button" class="btn btn-secondary" onclick="cancelEdit()"><i class="fas fa-times"></i> Cancel</button>
@@ -1218,8 +1257,8 @@ textarea:focus-visible {
 
   function toggleQuestionType() {
     const t = document.getElementById('edit-type').value;
-    document.getElementById('mcq-options').style.display   = t==='MCQ'?'block':'none';
-    document.getElementById('integer-answer').style.display = t==='Integer'?'block':'none';
+    document.getElementById('mcq-options').style.display   = t === 'MCQ' ? 'block' : 'none';
+    document.getElementById('integer-answer').style.display = t === 'Integer' ? 'block' : 'none';
   }
   function enterEditMode() { inEditMode = true; renderQuestion(); }
   function cancelEdit()    { inEditMode = false; renderQuestion(); }
@@ -1232,22 +1271,22 @@ textarea:focus-visible {
       questionType: document.getElementById('edit-type').value,
       solution:     document.getElementById('edit-solution').value.trim()
     };
-    if (payload.questionType==='MCQ') {
+    if (payload.questionType === 'MCQ') {
       payload.options       = ['A','B','C','D'].map(L => document.getElementById(`edit-option-${L}`).value.trim());
       payload.correctAnswer = document.getElementById('edit-correct').value;
-      if (payload.options.some(o=>!o))     { showToast('Fill all options','error'); return; }
-      if (!payload.correctAnswer)           { showToast('Select correct answer','error'); return; }
+      if (payload.options.some(o => !o))     { showToast('Fill all options', 'error'); return; }
+      if (!payload.correctAnswer)           { showToast('Select correct answer', 'error'); return; }
     } else {
       payload.answer = document.getElementById('edit-answer').value.trim();
-      if (!payload.answer) { showToast('Enter the answer','error'); return; }
+      if (!payload.answer) { showToast('Enter the answer', 'error'); return; }
     }
     try {
-      await api(`questions/${q._id}`, { method:'PATCH', body: JSON.stringify(payload) });
-      showToast('Question updated','success');
+      await api(`questions/${q._id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+      showToast('Question updated', 'success');
       inEditMode = false;
       await loadQuestions();
     } catch {
-      showToast('Error saving question','error');
+      showToast('Error saving question', 'error');
     }
   }
 
@@ -1255,37 +1294,45 @@ textarea:focus-visible {
     if (!confirm('Delete this question?')) return;
     const q = questions[currentIdx];
     try {
-      await api(`questions/${q._id}`, { method:'DELETE' });
-      showToast('Question deleted','success');
+      await api(`questions/${q._id}`, { method: 'DELETE' });
+      showToast('Question deleted', 'success');
       await loadQuestions();
     } catch {
-      showToast('Error deleting question','error');
+      showToast('Error deleting question', 'error');
     }
   }
 
-
   function prevQuestion() {
-    if (currentIdx>0) { currentIdx--; inEditMode=false; renderQuestion(); renderQuestionList(); }
+    if (currentIdx > 0) {
+      currentIdx--;
+      inEditMode = false;
+      renderQuestion();
+      renderQuestionList();
+    }
   }
   function nextQuestion() {
-    if (currentIdx<questions.length-1) { currentIdx++; inEditMode=false; renderQuestion(); renderQuestionList(); }
+    if (currentIdx < questions.length - 1) {
+      currentIdx++;
+      inEditMode = false;
+      renderQuestion();
+      renderQuestionList();
+    }
   }
   function updateNavigation() {
-    document.getElementById('current-question-index').textContent = currentIdx+1;
+    document.getElementById('current-question-index').textContent = currentIdx + 1;
     document.getElementById('total-questions').textContent        = questions.length;
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
-    if (prevBtn) prevBtn.disabled = currentIdx===0;
-    if (nextBtn) nextBtn.disabled = currentIdx===questions.length-1;
+    if (prevBtn) prevBtn.disabled = currentIdx === 0;
+    if (nextBtn) nextBtn.disabled = currentIdx === questions.length - 1;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    if (!testId) { showToast('No test ID','error'); return; }
+    if (!testId) { showToast('No test ID', 'error'); return; }
     loadTest();
   });
 
   // Expose globals
-  window.loadQuestions      = loadQuestions;
   window.prevQuestion       = prevQuestion;
   window.nextQuestion       = nextQuestion;
   window.enterEditMode      = enterEditMode;
