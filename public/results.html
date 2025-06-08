@@ -926,9 +926,11 @@ button:focus,
       </div>
     </main>
   </div>
-
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script>
-  // Dark mode functionality
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 1. Dark mode functionality
+  // ─────────────────────────────────────────────────────────────────────────────
   let isDarkMode = localStorage.getItem('darkMode') === 'true';
   const themeToggle = document.getElementById('themeToggle');
   const body = document.body;
@@ -960,23 +962,61 @@ button:focus,
     }, 150);
   }
 
-  // Event listener for theme toggle
   themeToggle.addEventListener('click', toggleDarkMode);
-
-  // Initialize on page load
   initializeDarkMode();
 
-  // Utility functions
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 2. Utility functions for text formatting
+  // ─────────────────────────────────────────────────────────────────────────────
   function getParam(name) {
     return new URLSearchParams(window.location.search).get(name) || '';
   }
 
+  // 2a. LaTeX Rendering Helper
+  function renderLatex(str) {
+    if (!str) return "—";
+
+    // 1) Detect existing TeX delimiters: \(…\), \[…\], $$…$$, or \begin{…}…\end{…}
+    const alreadyHasDelimiters =
+         /\\\(.+?\\\)/.test(str)         // \( … \)
+      || /\\\[.+?\\\]/.test(str)         // \[ … \]
+      || /\$\$[\s\S]+?\$\$/.test(str)    // $$ … $$
+      || /\\begin\{.+?\}[\s\S]+?\\end\{.+?\}/.test(str);
+
+    if (alreadyHasDelimiters) {
+      return str;
+    }
+
+    // 2) If we see a “bare” TeX pattern, wrap once in \( … \)
+    const hasInlineMath =
+         /\\frac\s*{[^}]+}\s*{[^}]+}/.test(str)
+      || /\\hat\{[^}]+\}/.test(str)
+      || /\\pi\b/.test(str)
+      || /\\varepsilon/.test(str)
+      || /[A-Za-z]+_\{.+?\}/.test(str);
+
+    if (hasInlineMath) {
+      return `\\(${str}\\)`;
+    }
+
+    // 3) Otherwise return unchanged
+    return str;
+  }
+
+  // 2b. Convert URLs to <img> and wrap any LaTeX
   function formatTextWithImages(text) {
     if (!text) return '';
-    return text.replace(
+
+    // First apply LaTeX wrapping if needed
+    let processed = renderLatex(text);
+
+    // Then replace any image URLs with <img> tags
+    processed = processed.replace(
       /(https?:\/\/[^\s]+\.(png|jpe?g|gif|svg))/gi,
       url => `<img src="${url}" class="question-image" alt="Question image">`
     );
+
+    return processed;
   }
 
   function showError(message) {
@@ -992,7 +1032,9 @@ button:focus,
     document.getElementById('results-content').style.display = 'block';
   }
 
-  // Get URL parameters
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 3. Get URL parameters
+  // ─────────────────────────────────────────────────────────────────────────────
   const testID = getParam('test');
   const batchName = getParam('batch');
   const username = getParam('username');
@@ -1002,13 +1044,37 @@ button:focus,
     throw new Error('Missing URL parameters');
   }
 
-  // Global variables
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 4. Global state for results
+  // ─────────────────────────────────────────────────────────────────────────────
   let resultsData = null;
   let currentSubject = '';
   let currentQuestionIndex = 0;
   let currentSubjectQuestions = [];
 
-  // Fetch results from backend
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 5. API helper
+  // ─────────────────────────────────────────────────────────────────────────────
+  async function api(path, opts = {}) {
+    try {
+      const response = await fetch('/api/' + path, {
+        headers: { 'Content-Type': 'application/json' },
+        ...opts
+      });
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        throw new Error(errorBody.error || `API Error: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 6. Fetch results from backend
+  // ─────────────────────────────────────────────────────────────────────────────
   async function fetchResults() {
     try {
       const response = await fetch(
@@ -1018,7 +1084,7 @@ button:focus,
       );
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({}));
         throw new Error(error.error || 'Failed to load results');
       }
 
@@ -1029,7 +1095,9 @@ button:focus,
     }
   }
 
-  // Create doughnut chart
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 7. Create doughnut chart
+  // ─────────────────────────────────────────────────────────────────────────────
   function createDoughnutChart(ctx, data) {
     return new Chart(ctx, {
       type: 'doughnut',
@@ -1046,9 +1114,7 @@ button:focus,
         responsive: true,
         maintainAspectRatio: true,
         plugins: {
-          legend: {
-            display: false
-          },
+          legend: { display: false },
           tooltip: {
             backgroundColor: 'rgba(0, 0, 0, 0.8)',
             titleColor: 'white',
@@ -1063,10 +1129,11 @@ button:focus,
     });
   }
 
-  // Render statistics cards with new marking scheme
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 8. Render statistics cards with new marking scheme
+  // ─────────────────────────────────────────────────────────────────────────────
   function renderStats(totalCorrect, totalWrong, totalUnanswered, totalScore) {
     const statsGrid = document.getElementById('stats-grid');
-    
     statsGrid.innerHTML = `
       <div class="stat-card correct">
         <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
@@ -1091,7 +1158,9 @@ button:focus,
     `;
   }
 
-  // Render subject tabs
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 9. Render subject tabs
+  // ─────────────────────────────────────────────────────────────────────────────
   function renderSubjectTabs(subjects) {
     const tabsContainer = document.getElementById('subject-tabs');
     tabsContainer.innerHTML = '';
@@ -1108,7 +1177,9 @@ button:focus,
     });
   }
 
-  // Select subject and show questions
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 10. Select subject and show questions
+  // ─────────────────────────────────────────────────────────────────────────────
   function selectSubject(subject, index) {
     currentSubject = subject;
     currentSubjectQuestions = resultsData.results[subject] || [];
@@ -1122,7 +1193,9 @@ button:focus,
     renderQuestion();
   }
 
-  // Render current question
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 11. Render current question
+  // ─────────────────────────────────────────────────────────────────────────────
   function renderQuestion() {
     const questionsContent = document.getElementById('questions-content');
     const questionCounter = document.getElementById('question-counter');
@@ -1244,9 +1317,16 @@ button:focus,
         </div>
       </div>
     `;
+
+    // ── Trigger MathJax to typeset any LaTeX in the newly injected HTML ──
+    if (window.MathJax) {
+      MathJax.typesetPromise([questionsContent]).catch(err => console.error("MathJax error:", err));
+    }
   }
 
-  // Navigation functions
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 12. Navigation functions
+  // ─────────────────────────────────────────────────────────────────────────────
   function previousQuestion() {
     if (currentQuestionIndex > 0) {
       currentQuestionIndex--;
@@ -1261,7 +1341,9 @@ button:focus,
     }
   }
 
-  // Main function to display results with new marking scheme
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 13. Main function to display results with new marking scheme
+  // ─────────────────────────────────────────────────────────────────────────────
   async function displayResults() {
     try {
       resultsData = await fetchResults();
@@ -1313,7 +1395,9 @@ button:focus,
     }
   }
 
-  // Keyboard navigation
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 14. Keyboard navigation
+  // ─────────────────────────────────────────────────────────────────────────────
   document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
@@ -1324,12 +1408,15 @@ button:focus,
     }
   });
 
-  // Initialize
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 15. Initialize on window load
+  // ─────────────────────────────────────────────────────────────────────────────
   window.addEventListener('load', displayResults);
 
-  // Make navigation functions global
+  // Expose navigation to global scope
   window.previousQuestion = previousQuestion;
-  window.nextQuestion = nextQuestion;
+  window.nextQuestion     = nextQuestion;
 </script>
+
 </body>
 </html>
