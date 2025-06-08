@@ -938,17 +938,37 @@ input:focus,
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 3. Inject MathJax Rendering Helper
-  //    - Wrap LaTeX expressions in delimiters that MathJax expects
-  //    - Automatically detect “$$…$$” or “\frac{…}{…}”
+  //    - Only wrap “bare” TeX; leave already‐wrapped TeX alone
   // ─────────────────────────────────────────────────────────────────────────────
-  const renderLatex = (str) => {
-    if (!str) return "";
-    // Detect display-style delimiters or inline \frac{}{} patterns
-    const hasDisplayMath = /\$\$[\s\S]*\$\$/.test(str);
-    const hasInlineFrac   = /\\frac\s*{[^}]+}\s*{[^}]+}/.test(str);
-    // If found, wrap in MathJax inline delimiters \( … \)
-    return (hasDisplayMath || hasInlineFrac) ? `\\(${str}\\)` : str;
-  };
+  function renderLatex(str) {
+    if (!str) return "—";
+
+    // 1) Detect existing TeX delimiters: \(…\), \[…\], $$…$$, or \begin{…}…\end{…}
+    const alreadyHasDelimiters =
+         /\\\(.+?\\\)/.test(str)         // \( … \)
+      || /\\\[.+?\\\]/.test(str)         // \[ … \]
+      || /\$\$[\s\S]+?\$\$/.test(str)    // $$ … $$
+      || /\\begin\{.+?\}[\s\S]+?\\end\{.+?\}/.test(str);  // any \begin{…} … \end{…}
+
+    if (alreadyHasDelimiters) {
+      return str;
+    }
+
+    // 2) If we see a “bare” TeX pattern, wrap once in \( … \)
+    const hasInlineMath =
+         /\\frac\s*{[^}]+}\s*{[^}]+}/.test(str)
+      || /\\hat\{[^}]+\}/.test(str)
+      || /\\pi\b/.test(str)
+      || /\\varepsilon/.test(str)
+      || /[A-Za-z]+_\{.+?\}/.test(str);
+
+    if (hasInlineMath) {
+      return `\\(${str}\\)`;
+    }
+
+    // 3) Otherwise leave it unchanged
+    return str;
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 4. Dark Mode Initialization & Toggle
@@ -1304,7 +1324,7 @@ input:focus,
         displayQuestion();
         updateNavInfo();
         updateProgress();
-        toggleProgress(); // auto-close progress on mobile
+        toggleProgress(); // auto‐close progress on mobile
       };
 
       container.appendChild(item);
@@ -1355,7 +1375,7 @@ input:focus,
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 15. Timer: Display & Auto-Submit on Zero
+  // 15. Timer: Display & Auto‐Submit on Zero
   // ─────────────────────────────────────────────────────────────────────────────
   function updateTimerDisplay() {
     const hours   = String(Math.floor(timeLeft / 3600)).padStart(2, '0');
@@ -1387,7 +1407,7 @@ input:focus,
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 16. Tab-Switch Detection (Auto-Submit)
+  // 16. Tab‐Switch Detection (Auto‐Submit)
   // ─────────────────────────────────────────────────────────────────────────────
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
@@ -1396,7 +1416,7 @@ input:focus,
         submitTest(true);
       } else {
         showToast(
-          `Warning: ${maxTabSwitches - tabSwitchCount} tab switches remaining before auto-submit.`,
+          `Warning: ${maxTabSwitches - tabSwitchCount} tab switches remaining before auto‐submit.`,
           "warning"
         );
       }
@@ -1448,7 +1468,7 @@ input:focus,
       localStorage.clear();
       clearInterval(timerInterval);
       showToast(
-        auto ? "Test auto-submitted successfully!" : "Test submitted successfully!",
+        auto ? "Test auto‐submitted successfully!" : "Test submitted successfully!",
         "success"
       );
 
@@ -1502,7 +1522,7 @@ input:focus,
       toast.style.transform = "translateX(0)";
     }, 100);
 
-    // Auto-remove
+    // Auto‐remove
     setTimeout(() => {
       toast.style.transform = "translateX(100%)";
       setTimeout(() => document.body.removeChild(toast), 300);
