@@ -976,7 +976,7 @@ button:focus,
   function renderLatex(str) {
     if (!str) return "—";
 
-    // 1) Detect existing TeX delimiters: \(…\), \[…\], $$…$$, or \begin{…}…\end{…}
+    // Detect existing TeX delimiters: \(…\), \[…\], $$…$$, or \begin{…}…\end{…}
     const alreadyHasDelimiters =
          /\\\(.+?\\\)/.test(str)         // \( … \)
       || /\\\[.+?\\\]/.test(str)         // \[ … \]
@@ -987,7 +987,7 @@ button:focus,
       return str;
     }
 
-    // 2) If we see a “bare” TeX pattern, wrap once in \( … \)
+    // If we see a “bare” TeX pattern, wrap once in \( … \)
     const hasInlineMath =
          /\\frac\s*{[^}]+}\s*{[^}]+}/.test(str)
       || /\\hat\{[^}]+\}/.test(str)
@@ -999,22 +999,28 @@ button:focus,
       return `\\(${str}\\)`;
     }
 
-    // 3) Otherwise return unchanged
+    // Otherwise return unchanged
     return str;
   }
 
-  // 2b. Convert URLs to <img> and wrap any LaTeX
-  function formatTextWithImages(text) {
+  // 2b. Convert any URL into <img> if it's an image, or <a> if not
+  function formatTextWithImagesAndLinks(text) {
     if (!text) return '';
 
     // First apply LaTeX wrapping if needed
     let processed = renderLatex(text);
 
-    // Then replace any image URLs with <img> tags
-    processed = processed.replace(
-      /(https?:\/\/[^\s]+\.(png|jpe?g|gif|svg))/gi,
-      url => `<img src="${url}" class="question-image" alt="Question image">`
-    );
+    // Then replace any URL with either an <img> or <a> tag
+    const urlRegex = /(https?:\/\/[^\s]+)/gi;
+    processed = processed.replace(urlRegex, url => {
+      // Check if URL ends with a common image extension
+      if (/\.(png|jpe?g|gif|svg)(\?[^ ]*)?$/i.test(url)) {
+        return `<img src="${url}" class="question-image" alt="Image from URL">`;
+      } else {
+        // Non-image URL: render as clickable link
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      }
+    });
 
     return processed;
   }
@@ -1242,7 +1248,7 @@ button:focus,
               classes += ' selected';
             }
             
-            return `<li class="${classes}">${formatTextWithImages(option)}</li>`;
+            return `<li class="${classes}">${formatTextWithImagesAndLinks(option)}</li>`;
           }).join('')}
         </ul>
       `;
@@ -1287,7 +1293,7 @@ button:focus,
         </div>
         <div class="question-body">
           <div class="question-text">
-            ${formatTextWithImages(question.question)}
+            ${formatTextWithImagesAndLinks(question.question)}
           </div>
           
           ${optionsHTML}
@@ -1300,7 +1306,7 @@ button:focus,
               Solution
             </div>
             <div class="solution-text">
-              ${formatTextWithImages(question.solution || 'No solution provided.')}
+              ${formatTextWithImagesAndLinks(question.solution || 'No solution provided.')}
             </div>
           </div>
           
@@ -1362,7 +1368,6 @@ button:focus,
           
           if (!selected) {
             totalUnanswered++;
-            // 0 points for unanswered
           } else if (selected === correct) {
             totalCorrect++;
             totalScore += 4; // +4 for correct answer
@@ -1417,6 +1422,7 @@ button:focus,
   window.previousQuestion = previousQuestion;
   window.nextQuestion     = nextQuestion;
 </script>
+
 
 </body>
 </html>
